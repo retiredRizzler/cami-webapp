@@ -7,10 +7,10 @@
           <div class="flex items-center justify-between">
             <div>
               <h1 class="text-2xl font-bold mb-2">
-                Bonjour {{ userName }} ! 👋
+                ZALAN IS THE GAYEST #nocap 👋
               </h1>
               <p class="opacity-90 mb-4">
-                Voici un aperçu de votre activité aujourd'hui
+                Ceci est une page statique, il ne faut pas se fier aux données qu'elle affiche
               </p>
               <div class="flex items-center gap-4 text-sm">
                 <div class="flex items-center gap-2">
