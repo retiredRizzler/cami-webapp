@@ -58,9 +58,9 @@
               </div>
               <div class="flex flex-col">
                 <span class="font-bold text-base sm:text-lg text-primary leading-tight"
-                  >Driving School</span
+                  >CamInvoice</span
                 >
-                <span class="text-xs text-surface-600">Gestion Pro</span>
+                <span class="text-xs text-surface-600">Gestionnaire de factures pour auto-école</span>
               </div>
             </div>
             <Button

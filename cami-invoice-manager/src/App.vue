@@ -337,7 +337,7 @@ export default {
     currentPageTitle() {
       const titles = {
         'dashboard': 'Tableau de bord',
-        'customers': 'Gestion des élèves',
+        'customers': 'Gestion des clients',
         'invoices': 'Facturation',
         'lessons': 'Planning des leçons',
         'reports': 'Rapports',
@@ -349,7 +349,7 @@ export default {
     currentPageDescription() {
       const descriptions = {
         'dashboard': 'Vue d\'ensemble de votre activité',
-        'customers': 'Gérez vos élèves et leurs informations',
+        'customers': 'Gérez vos clients et leurs informations',
         'invoices': 'Créez et suivez vos factures',
         'lessons': 'Planifiez et organisez vos cours',
         'reports': 'Analysez vos performances',

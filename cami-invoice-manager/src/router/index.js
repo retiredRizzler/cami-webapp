@@ -14,7 +14,10 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      redirect: "/customers",
+      redirect: "/dashboard",
+      meta: {
+        title: "Home"
+      }
     },
     {
       path: "/login",
@@ -27,6 +30,7 @@ const router = createRouter({
       component: Dashboard,
       meta: {
         requiresAuth: true,
+        title: "Tableau de bord"
       }
     },
     {
@@ -35,6 +39,7 @@ const router = createRouter({
       component: CustomersView,
       meta: {
         requiresAuth: true,
+        title: "Clients"
       },
     },
     {
@@ -43,6 +48,7 @@ const router = createRouter({
       component: InvoicesView,
       meta: {
         requiresAuth: true,
+        title: "Factures"
       },
     },
     {
@@ -51,13 +57,14 @@ const router = createRouter({
       component: ProfileView,
       meta: {
         requiresAuth: true,
+        title: "Profil"
       },
     },
   ],
 });
 
 router.beforeEach(async (to, from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} - Attendo` : 'CAMI'
+  document.title = to.meta.title ? `${to.meta.title} - CamInvoice` : 'CAMI'
 
   const authStore = useAuthStore();
 
