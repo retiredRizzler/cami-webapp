@@ -57,6 +57,8 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
+  document.title = to.meta.title ? `${to.meta.title} - Attendo` : 'CAMI'
+
   const authStore = useAuthStore();
 
   if (authStore.isLoading) {
