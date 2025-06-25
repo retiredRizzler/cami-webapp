@@ -2,6 +2,7 @@
 
 - Fix input number bug in invoice form
 - Make a way to quick add new invoice with same info but only change the quantity number
+- Check if user has completed his personnal info before he create new invoice
 - Update Dashboard with relevant data
 - Make the Download Invoice button more "voyant"
 - Optimize filter in data table / cards to order by year etc
