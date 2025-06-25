@@ -11,3 +11,4 @@
 - Find technique to translate the webapp in french/english
 - Check again the forms and delete useless features
 - Check if user had client when trying to create new invoices
+- Make the page header slightly more on the right so hamb button doesnt overwrite it 
