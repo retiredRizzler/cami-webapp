@@ -263,7 +263,7 @@ app.use(createPinia())
 app.use(router)
 app.use(PrimeVue, {
     theme: {
-        preset: Executive,
+        preset: Platinum,
         options: {
             darkModeSelector: 'none', // Changed to class-based selector
         }
