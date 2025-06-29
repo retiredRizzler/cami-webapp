@@ -5,8 +5,8 @@
 
     <!-- Page Header -->
     <div class="mb-6">
-      <h1 class="text-3xl font-bold text-primary mb-2">Instructor Profile</h1>
-      <p class="text-muted-color">Manage your business information and invoice settings</p>
+      <h1 class="text-3xl font-bold text-primary mb-2">Profil Instructeur</h1>
+      <p class="text-muted-color">Gérez vos informations commerciales et paramètres de facturation</p>
     </div>
 
     <!-- Profile Status Card -->
@@ -19,12 +19,12 @@
             </div>
             <div>
               <h3 class="text-lg font-semibold text-surface-900">
-                {{ profileStatus.hasProfile ? 'Profile Configuration' : 'Welcome! Set up your profile' }}
+                {{ profileStatus.hasProfile ? 'Configuration du Profil' : 'Bienvenue ! Configurez votre profil' }}
               </h3>
               <p class="text-sm text-surface-600 mb-2">
                 {{ profileStatus.hasProfile
-                    ? `Your profile is ${profileStatus.completionPercentage}% complete`
-                    : 'Complete your profile to generate professional invoices' }}
+                    ? `Votre profil est complété à ${profileStatus.completionPercentage}%`
+                    : 'Complétez votre profil pour générer des factures professionnelles' }}
               </p>
               <div class="flex items-center gap-2">
                 <ProgressBar
@@ -44,7 +44,7 @@
               <i class="pi pi-exclamation-triangle"></i>
             </template>
             <div>
-              <div class="font-medium mb-1">Required fields missing:</div>
+              <div class="font-medium mb-1">Champs obligatoires manquants :</div>
               <div class="text-sm">{{ profileStatus.missingRequiredFields.join(', ') }}</div>
             </div>
           </Message>
@@ -88,14 +88,14 @@
       <div class="w-24 h-24 bg-surface-100 rounded-full flex items-center justify-center mx-auto mb-4">
         <i class="pi pi-user-plus text-3xl text-muted-color"></i>
       </div>
-      <h3 class="text-xl font-semibold mb-2">Set up your instructor profile</h3>
+      <h3 class="text-xl font-semibold mb-2">Configurez votre profil d'instructeur</h3>
       <p class="text-muted-color mb-6 max-w-md mx-auto">
-        Start by configuring your business information. You can edit each section individually
-        using the edit buttons on each card.
+        Commencez par configurer vos informations commerciales. Vous pouvez modifier chaque section individuellement
+        en utilisant les boutons de modification sur chaque carte.
       </p>
       <Button
         icon="pi pi-arrow-down"
-        label="Start with Business Info"
+        label="Commencer par les Infos Commerciales"
         size="large"
         @click="scrollToBusinessCard"
       />
@@ -104,8 +104,8 @@
     <!-- Quick Actions -->
     <div v-if="profile" class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <Button
-        icon="pi pi-trash"
-        label="Reset Profile"
+        icon="pi pi-refresh"
+        label="Réinitialiser Profil"
         severity="danger"
         outlined
         @click="confirmReset"
@@ -118,18 +118,18 @@
       <Card>
         <template #header>
           <div class="p-6 pb-0">
-            <h3 class="text-lg font-semibold text-primary">💡 Complete Your Profile</h3>
+            <h3 class="text-lg font-semibold text-primary">💡 Complétez Votre Profil</h3>
           </div>
         </template>
         <template #content>
           <div class="space-y-3">
             <p class="text-sm text-surface-600 mb-4">
-              Complete these sections to unlock all features and create professional invoices:
+              Complétez ces sections pour débloquer toutes les fonctionnalités et créer des factures professionnelles :
             </p>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div v-if="profileStatus.missingRequiredFields.length > 0">
-                <h4 class="font-medium text-red-600 mb-2">Required Fields</h4>
+                <h4 class="font-medium text-red-600 mb-2">Champs Obligatoires</h4>
                 <ul class="space-y-1">
                   <li v-for="field in profileStatus.missingRequiredFields" :key="field"
                       class="text-sm flex items-center gap-2">
@@ -140,7 +140,7 @@
               </div>
 
               <div v-if="profileStatus.missingOptionalFields.length > 0">
-                <h4 class="font-medium text-orange-600 mb-2">Recommended Fields</h4>
+                <h4 class="font-medium text-orange-600 mb-2">Champs Recommandés</h4>
                 <ul class="space-y-1">
                   <li v-for="field in profileStatus.missingOptionalFields.slice(0, 5)" :key="field"
                       class="text-sm flex items-center gap-2">
@@ -149,7 +149,7 @@
                   </li>
                 </ul>
                 <div v-if="profileStatus.missingOptionalFields.length > 5" class="text-xs text-muted-color mt-2">
-                  +{{ profileStatus.missingOptionalFields.length - 5 }} more fields
+                  +{{ profileStatus.missingOptionalFields.length - 5 }} champs supplémentaires
                 </div>
               </div>
             </div>
@@ -162,7 +162,7 @@
     <div v-if="loading" class="fixed inset-0 bg-white bg-opacity-75 flex items-center justify-center z-50">
       <div class="text-center">
         <ProgressSpinner strokeWidth="3" />
-        <div class="mt-4 text-lg font-medium">Loading profile...</div>
+        <div class="mt-4 text-lg font-medium">Chargement du profil...</div>
       </div>
     </div>
   </div>
@@ -215,8 +215,8 @@ export default {
         console.error('Error loading profile:', error)
         this.$toast.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load instructor profile',
+          summary: 'Erreur',
+          detail: 'Échec du chargement du profil instructeur',
           life: 5000
         })
       } finally {
@@ -237,8 +237,8 @@ export default {
 
         this.$toast.add({
           severity: 'success',
-          summary: 'Success',
-          detail: 'Profile updated successfully',
+          summary: 'Succès',
+          detail: 'Profil mis à jour avec succès',
           life: 3000
         })
 
@@ -250,8 +250,8 @@ export default {
         console.error('Error updating profile:', error)
         this.$toast.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to update profile. Please try again.',
+          summary: 'Erreur',
+          detail: 'Échec de la mise à jour du profil. Veuillez réessayer.',
           life: 5000
         })
       }
@@ -261,8 +261,8 @@ export default {
       console.error('Card error:', error)
       this.$toast.add({
         severity: 'error',
-        summary: 'Error',
-        detail: 'An error occurred while updating the profile',
+        summary: 'Erreur',
+        detail: 'Une erreur s\'est produite lors de la mise à jour du profil',
         life: 5000
       })
     },
@@ -271,8 +271,8 @@ export default {
       if (!this.profileStatus.isComplete) {
         this.$toast.add({
           severity: 'warn',
-          summary: 'Incomplete Profile',
-          detail: 'Please complete all required fields before previewing',
+          summary: 'Profil Incomplet',
+          detail: 'Veuillez compléter tous les champs obligatoires avant l\'aperçu',
           life: 4000
         })
         return
@@ -281,8 +281,8 @@ export default {
       // TODO: Implement invoice preview with current profile data
       this.$toast.add({
         severity: 'info',
-        summary: 'Feature Coming Soon',
-        detail: 'Invoice preview with your profile data will be available soon',
+        summary: 'Fonctionnalité Bientôt Disponible',
+        detail: 'L\'aperçu de facture avec vos données de profil sera bientôt disponible',
         life: 3000
       })
     },
@@ -296,14 +296,14 @@ export default {
       const url = URL.createObjectURL(dataBlob)
       const link = document.createElement('a')
       link.href = url
-      link.download = `instructor-profile-${new Date().toISOString().split('T')[0]}.json`
+      link.download = `profil-instructeur-${new Date().toISOString().split('T')[0]}.json`
       link.click()
       URL.revokeObjectURL(url)
 
       this.$toast.add({
         severity: 'success',
-        summary: 'Export Complete',
-        detail: 'Profile data exported successfully',
+        summary: 'Export Terminé',
+        detail: 'Données du profil exportées avec succès',
         life: 3000
       })
     },
@@ -312,24 +312,24 @@ export default {
       // TODO: Implement settings duplication/templates
       this.$toast.add({
         severity: 'info',
-        summary: 'Feature Coming Soon',
-        detail: 'Profile templates and duplication will be available soon',
+        summary: 'Fonctionnalité Bientôt Disponible',
+        detail: 'Les modèles de profil et la duplication seront bientôt disponibles',
         life: 3000
       })
     },
 
     confirmReset() {
       this.$confirm.require({
-        message: 'Are you sure you want to reset your instructor profile? This action will permanently delete all your business information and cannot be undone.',
-        header: 'Reset Profile',
+        message: 'Êtes-vous sûr de vouloir réinitialiser votre profil d\'instructeur ? Cette action supprimera définitivement toutes vos informations commerciales et ne peut pas être annulée.',
+        header: 'Réinitialiser Profil',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
-          label: 'Cancel',
+          label: 'Annuler',
           severity: 'secondary',
           outlined: true
         },
         acceptProps: {
-          label: 'Reset Profile',
+          label: 'Réinitialiser Profil',
           severity: 'danger'
         },
         accept: () => {
@@ -344,8 +344,8 @@ export default {
 
         this.$toast.add({
           severity: 'success',
-          summary: 'Profile Reset',
-          detail: 'Your instructor profile has been successfully reset',
+          summary: 'Profil Réinitialisé',
+          detail: 'Votre profil instructeur a été réinitialisé avec succès',
           life: 3000
         })
 
@@ -355,8 +355,8 @@ export default {
         console.error('Error resetting profile:', error)
         this.$toast.add({
           severity: 'error',
-          summary: 'Reset Failed',
-          detail: 'Failed to reset profile. Please try again.',
+          summary: 'Échec de la Réinitialisation',
+          detail: 'Échec de la réinitialisation du profil. Veuillez réessayer.',
           life: 5000
         })
       }

@@ -7,12 +7,8 @@
     >
       <div class="text-center space-y-4">
         <ProgressSpinner strokeWidth="3" />
-        <div class="text-lg font-medium text-surface-700">
-          Chargement de l'application...
-        </div>
-        <div class="text-sm text-surface-500">
-          Préparation de votre espace de travail
-        </div>
+        <div class="text-lg font-medium text-surface-700">Chargement de l'application...</div>
+        <div class="text-sm text-surface-500">Préparation de votre espace de travail</div>
       </div>
     </div>
 
@@ -22,33 +18,41 @@
     <!-- Main Content Area -->
     <div class="main-content" :class="{ 'blur-sm': isInitializing }">
       <!-- Top Navigation Bar - Mobile Responsive -->
-      <header v-if="authStore.user" class="bg-white border-b border-surface-200 sticky top-0 z-40 shadow-sm">
+      <header
+        v-if="authStore.user"
+        class="bg-white border-b border-surface-200 sticky top-0 z-40 shadow-sm"
+      >
         <!-- Mobile Header -->
         <div class="md:hidden">
-          <div class="flex items-center justify-between p-3">
-            <!-- Left: Page Title (Compact) -->
+          <div class="flex items-center justify-between p-3 pl-16 sm:pl-14">
+            <!-- Left: Page Title -->
             <div class="flex items-center gap-2 flex-1 min-w-0">
-              <div class="w-6 h-6 bg-primary-100 rounded-md flex items-center justify-center flex-shrink-0">
+              <div
+                class="w-6 h-6 bg-primary-100 rounded-md flex items-center justify-center flex-shrink-0"
+              >
                 <i :class="currentPageIcon" class="text-primary-600 text-sm"></i>
               </div>
               <div class="min-w-0 flex-1">
-                <h1 class="text-lg font-semibold text-surface-900 truncate">
+                <h1 class="text-base sm:text-lg font-semibold text-surface-900 truncate">
                   {{ currentPageTitle }}
                 </h1>
+                <!-- Description uniquement sur les écrans un peu plus larges -->
+                <p class="hidden sm:block text-xs text-surface-600 truncate">
+                  {{ currentPageDescription }}
+                </p>
               </div>
             </div>
 
             <!-- Right: Mobile Actions -->
             <div class="flex items-center gap-1">
-              <!-- Quick Actions -->
               <Button
                 icon="pi pi-plus"
                 @click="toggleQuickActions"
                 variant="text"
                 rounded
                 size="small"
-                class="w-8 h-8"
-                v-tooltip.bottom="'Quick Actions'"
+                class="w-8 h-8 sm:w-9 sm:h-9"
+                v-tooltip.bottom="'Actions rapides'"
               />
             </div>
           </div>
@@ -90,7 +94,7 @@
                   icon="pi pi-user"
                   variant="text"
                   rounded
-                  @click="this.$router.push({name: 'profile'})"
+                  @click="this.$router.push({ name: 'profile' })"
                   v-tooltip.bottom="'Mon compte'"
                 />
               </div>
@@ -126,11 +130,7 @@
           <!-- Page Content with Smooth Transitions -->
           <transition name="page" mode="out-in">
             <RouterView v-slot="{ Component, route }">
-              <component
-                :is="Component"
-                :key="route.path"
-                class="animate-fade-in"
-              />
+              <component :is="Component" :key="route.path" class="animate-fade-in" />
             </RouterView>
           </transition>
         </div>
@@ -142,7 +142,7 @@
           <!-- Mobile Footer -->
           <div class="md:hidden text-center">
             <div class="text-xs text-surface-600 space-y-1">
-              <div>© 2025 Driving School Pro</div>
+              <div>© 2025 CamInvoice</div>
               <div class="flex items-center justify-center gap-1">
                 <div class="w-1.5 h-1.5 bg-success-500 rounded-full animate-pulse"></div>
                 <span>System Online</span>
@@ -153,7 +153,7 @@
           <!-- Desktop Footer -->
           <div class="hidden md:flex items-center justify-between text-sm text-surface-600">
             <div class="flex items-center gap-4">
-              <span>© 2025 Driving School Pro</span>
+              <span>© 2025 CamInvoice</span>
               <Divider layout="vertical" class="h-4" />
               <span>Version 1.0.0</span>
               <Divider layout="vertical" class="h-4" />
@@ -216,8 +216,10 @@
             :class="{ 'bg-primary-50': !notification.read }"
             @click="handleNotificationClick(notification)"
           >
-            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
-                 :class="getNotificationIconClass(notification.type)">
+            <div
+              class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0"
+              :class="getNotificationIconClass(notification.type)"
+            >
               <i :class="getNotificationIcon(notification.type)" class="text-sm"></i>
             </div>
             <div class="flex-1 min-w-0">
@@ -231,7 +233,10 @@
                 {{ formatRelativeTime(notification.createdAt) }}
               </div>
             </div>
-            <div v-if="!notification.read" class="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"></div>
+            <div
+              v-if="!notification.read"
+              class="w-2 h-2 bg-primary-500 rounded-full mt-2 flex-shrink-0"
+            ></div>
           </div>
           <div v-if="recentNotifications.length === 0" class="text-center py-8 text-surface-500">
             <i class="pi pi-bell text-3xl mb-3 block"></i>
@@ -288,112 +293,110 @@
 </template>
 
 <script>
-import SideBar from '@/components/SideBar.vue'
-import { mapStores } from 'pinia';
-import { useAuthStore } from '@/stores/AuthStore';
+import SideBar from "@/components/SideBar.vue";
+import { mapStores } from "pinia";
+import { useAuthStore } from "@/stores/AuthStore";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    SideBar
+    SideBar,
   },
   data() {
     return {
       isInitializing: true,
-      globalSearch: '',
+      globalSearch: "",
       unreadNotifications: 3,
       showMobileSearch: false,
       isMobile: false,
       recentNotifications: [
         {
           id: 1,
-          type: 'success',
-          title: 'Facture payée',
-          message: 'La facture #2024-001 a été payée par Jean Dupont',
+          type: "success",
+          title: "Facture payée",
+          message: "La facture #2024-001 a été payée par Jean Dupont",
           createdAt: new Date(Date.now() - 1000 * 60 * 30),
-          read: false
+          read: false,
         },
         {
           id: 2,
-          type: 'warning',
-          title: 'Leçon rappel',
-          message: 'Leçon prévue avec Marie Martin dans 1 heure',
+          type: "warning",
+          title: "Leçon rappel",
+          message: "Leçon prévue avec Marie Martin dans 1 heure",
           createdAt: new Date(Date.now() - 1000 * 60 * 60),
-          read: false
+          read: false,
         },
         {
           id: 3,
-          type: 'info',
-          title: 'Nouveau message',
-          message: 'Pierre Durand a envoyé un message',
+          type: "info",
+          title: "Nouveau message",
+          message: "Pierre Durand a envoyé un message",
           createdAt: new Date(Date.now() - 1000 * 60 * 60 * 2),
-          read: true
-        }
-      ]
-    }
+          read: true,
+        },
+      ],
+    };
   },
   computed: {
     ...mapStores(useAuthStore),
     currentPageTitle() {
       const titles = {
-        'dashboard': 'Tableau de bord',
-        'customers': 'Gestion des clients',
-        'invoices': 'Facturation',
-        'lessons': 'Planning des leçons',
-        'reports': 'Rapports',
-        'profile': 'Mon Profil',
-        'settings': 'Paramètres'
+        dashboard: "Tableau de bord",
+        customers: "Gestion des clients",
+        invoices: "Facturation",
+        lessons: "Planning des leçons",
+        reports: "Rapports",
+        profile: "Mon Profil",
+        settings: "Paramètres",
       };
-      return titles[this.$route.name] || 'Driving School Pro';
+      return titles[this.$route.name] || "Driving School Pro";
     },
     currentPageDescription() {
       const descriptions = {
-        'dashboard': 'Vue d\'ensemble de votre activité',
-        'customers': 'Gérez vos clients et leurs informations',
-        'invoices': 'Créez et suivez vos factures',
-        'lessons': 'Planifiez et organisez vos cours',
-        'reports': 'Analysez vos performances',
-        'profile': 'Gérez vos informations d\'instructeur',
-        'settings': 'Configurez votre application'
+        dashboard: "Vue d'ensemble de votre activité",
+        customers: "Gérez vos clients et leurs informations",
+        invoices: "Créez et suivez vos factures",
+        lessons: "Planifiez et organisez vos cours",
+        reports: "Analysez vos performances",
+        profile: "Gérez vos informations d'instructeur",
+        settings: "Configurez votre application",
       };
-      return descriptions[this.$route.name] || 'Gestion professionnelle de votre auto-école';
+      return descriptions[this.$route.name] || "Gestion professionnelle de votre auto-école";
     },
     currentPageIcon() {
       const icons = {
-        'dashboard': 'pi pi-home',
-        'customers': 'pi pi-users',
-        'invoices': 'pi pi-receipt',
-        'lessons': 'pi pi-calendar',
-        'reports': 'pi pi-chart-line',
-        'profile': 'pi pi-user',
-        'settings': 'pi pi-cog'
+        dashboard: "pi pi-home",
+        customers: "pi pi-users",
+        invoices: "pi pi-receipt",
+        lessons: "pi pi-calendar",
+        reports: "pi pi-chart-line",
+        profile: "pi pi-user",
+        settings: "pi pi-cog",
       };
-      return icons[this.$route.name] || 'pi pi-home';
+      return icons[this.$route.name] || "pi pi-home";
     },
     breadcrumbs() {
       const route = this.$route;
-      const breadcrumbs = [
-        { label: 'Accueil', icon: 'pi pi-home', route: { name: 'dashboard' } }
-      ];
+      const breadcrumbs = [{ label: "Accueil", icon: "pi pi-home", route: { name: "dashboard" } }];
 
-      if (route.name !== 'dashboard') {
+      if (route.name !== "dashboard") {
         breadcrumbs.push({
           label: this.currentPageTitle,
-          icon: this.currentPageIcon
+          icon: this.currentPageIcon,
         });
       }
 
       return breadcrumbs;
-    }
+    },
   },
   async created() {
     await this.authStore.init();
     this.isInitializing = false;
     this.checkMobile();
-    window.addEventListener('resize', this.checkMobile);
+    window.addEventListener("resize", this.checkMobile);
   },
   beforeUnmount() {
-    window.removeEventListener('resize', this.checkMobile);
+    window.removeEventListener("resize", this.checkMobile);
   },
   mounted() {
     this.$primevue.config.ripple = true;
@@ -433,19 +436,19 @@ export default {
       this.$refs.quickActionsPanel.hide();
       this.$router.push({ name: action });
       this.$toast.add({
-        severity: 'info',
-        summary: 'Navigation',
-        detail: 'Redirection vers ' + action,
-        life: 2000
+        severity: "info",
+        summary: "Navigation",
+        detail: "Redirection vers " + action,
+        life: 2000,
       });
     },
     performGlobalSearch() {
       if (this.globalSearch.trim()) {
         this.$toast.add({
-          severity: 'info',
-          summary: 'Recherche',
+          severity: "info",
+          summary: "Recherche",
           detail: `Recherche pour: ${this.globalSearch}`,
-          life: 3000
+          life: 3000,
         });
         if (this.isMobile) {
           this.showMobileSearch = false;
@@ -453,13 +456,13 @@ export default {
       }
     },
     markAllAsRead() {
-      this.recentNotifications.forEach(n => n.read = true);
+      this.recentNotifications.forEach((n) => (n.read = true));
       this.unreadNotifications = 0;
       this.$toast.add({
-        severity: 'success',
-        summary: 'Notifications',
-        detail: 'Toutes les notifications ont été marquées comme lues',
-        life: 2000
+        severity: "success",
+        summary: "Notifications",
+        detail: "Toutes les notifications ont été marquées comme lues",
+        life: 2000,
       });
     },
     handleNotificationClick(notification) {
@@ -471,21 +474,21 @@ export default {
     },
     getNotificationIcon(type) {
       const icons = {
-        'success': 'pi pi-check',
-        'warning': 'pi pi-exclamation-triangle',
-        'error': 'pi pi-times',
-        'info': 'pi pi-info'
+        success: "pi pi-check",
+        warning: "pi pi-exclamation-triangle",
+        error: "pi pi-times",
+        info: "pi pi-info",
       };
-      return icons[type] || 'pi pi-info';
+      return icons[type] || "pi pi-info";
     },
     getNotificationIconClass(type) {
       const classes = {
-        'success': 'bg-success-100 text-success-600',
-        'warning': 'bg-warning-100 text-warning-600',
-        'error': 'bg-danger-100 text-danger-600',
-        'info': 'bg-info-100 text-info-600'
+        success: "bg-success-100 text-success-600",
+        warning: "bg-warning-100 text-warning-600",
+        error: "bg-danger-100 text-danger-600",
+        info: "bg-info-100 text-info-600",
       };
-      return classes[type] || 'bg-info-100 text-info-600';
+      return classes[type] || "bg-info-100 text-info-600";
     },
     formatRelativeTime(date) {
       const now = new Date();
@@ -494,29 +497,29 @@ export default {
       const hours = Math.floor(minutes / 60);
       const days = Math.floor(hours / 24);
 
-      if (days > 0) return `Il y a ${days} jour${days > 1 ? 's' : ''}`;
-      if (hours > 0) return `Il y a ${hours} heure${hours > 1 ? 's' : ''}`;
-      if (minutes > 0) return `Il y a ${minutes} minute${minutes > 1 ? 's' : ''}`;
-      return 'À l\'instant';
+      if (days > 0) return `Il y a ${days} jour${days > 1 ? "s" : ""}`;
+      if (hours > 0) return `Il y a ${hours} heure${hours > 1 ? "s" : ""}`;
+      if (minutes > 0) return `Il y a ${minutes} minute${minutes > 1 ? "s" : ""}`;
+      return "À l'instant";
     },
     openSupport() {
       this.$toast.add({
-        severity: 'info',
-        summary: 'Support',
-        detail: 'Ouverture du centre d\'aide...',
-        life: 2000
+        severity: "info",
+        summary: "Support",
+        detail: "Ouverture du centre d'aide...",
+        life: 2000,
       });
     },
     openDocs() {
       this.$toast.add({
-        severity: 'info',
-        summary: 'Documentation',
-        detail: 'Ouverture de la documentation...',
-        life: 2000
+        severity: "info",
+        summary: "Documentation",
+        detail: "Ouverture de la documentation...",
+        life: 2000,
       });
-    }
-  }
-}
+    },
+  },
+};
 </script>
 
 <style scoped>

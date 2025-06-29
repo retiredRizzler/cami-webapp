@@ -10,10 +10,10 @@
         @click="visible = true"
         v-tooltip.right="'Menu principal'"
         aria-label="Ouvrir le menu principal"
-        :class="isMobile ? 'w-11 h-11' : 'w-10 h-10'"
+        class="w-10 h-10 sm:w-11 sm:h-11"
         :pt="{
           root: {
-            class: isMobile ? 'shadow-lg backdrop-blur-sm bg-white/90' : '',
+            class: 'shadow-lg backdrop-blur-sm bg-white/95',
           },
         }"
       />
@@ -60,7 +60,9 @@
                 <span class="font-bold text-base sm:text-lg text-primary leading-tight"
                   >CamInvoice</span
                 >
-                <span class="text-xs text-surface-600">Gestionnaire de factures pour auto-école</span>
+                <span class="text-xs text-surface-600"
+                  >Gestionnaire de factures pour auto-école</span
+                >
               </div>
             </div>
             <Button
@@ -196,7 +198,7 @@
                 }"
               />
               <Button
-                label="Ajouter un élève"
+                label="Ajouter un client"
                 icon="pi pi-user-plus"
                 @click="navigateTo('customers')"
                 class="w-full justify-start text-sm"

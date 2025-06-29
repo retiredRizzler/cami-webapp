@@ -7,9 +7,9 @@
       @submit="onFormSubmit"
       class="flex flex-col gap-4 sm:gap-6"
     >
-      <!-- Client Type Selection -->
+      <!-- Sélection du type de client -->
       <div class="flex flex-col gap-2">
-        <label class="font-medium text-sm">Client Type</label>
+        <label class="font-medium text-sm">Type de client</label>
         <SelectButton
           name="client_type"
           :options="clientTypeOptions"
@@ -26,10 +26,10 @@
         </Message>
       </div>
 
-      <!-- Dynamic Form Fields Based on Client Type -->
+      <!-- Champs de formulaire dynamiques basés sur le type de client -->
       <div class="grid grid-cols-1 gap-4 sm:gap-4 md:grid-cols-2">
 
-        <!-- Individual Fields -->
+        <!-- Champs pour particuliers -->
         <template v-if="currentClientType === 'individual'">
           <div class="flex flex-col gap-1">
             <FloatLabel variant="on">
@@ -41,7 +41,7 @@
                 autocomplete="given-name"
                 class="text-base"
               />
-              <label for="first_name">First Name *</label>
+              <label for="first_name">Prénom *</label>
             </FloatLabel>
             <Message v-if="$form.first_name?.invalid" severity="error" size="small">
               {{ $form.first_name.error?.message }}
@@ -58,7 +58,7 @@
                 autocomplete="family-name"
                 class="text-base"
               />
-              <label for="last_name">Last Name *</label>
+              <label for="last_name">Nom *</label>
             </FloatLabel>
             <Message v-if="$form.last_name?.invalid" severity="error" size="small">
               {{ $form.last_name.error?.message }}
@@ -77,7 +77,7 @@
                 :invalid="$form.license_type?.invalid"
                 class="text-base"
               />
-              <label for="license_type">License Type</label>
+              <label for="license_type">Type de permis</label>
             </FloatLabel>
             <Message v-if="$form.license_type?.invalid" severity="error" size="small">
               {{ $form.license_type.error?.message }}
@@ -85,7 +85,7 @@
           </div>
         </template>
 
-        <!-- Company Fields -->
+        <!-- Champs pour entreprises -->
         <template v-if="currentClientType === 'company'">
           <div class="flex flex-col gap-1 md:col-span-2">
             <FloatLabel variant="on">
@@ -97,7 +97,7 @@
                 autocomplete="organization"
                 class="text-base"
               />
-              <label for="company_name">Company Name *</label>
+              <label for="company_name">Nom de l'entreprise *</label>
             </FloatLabel>
             <Message v-if="$form.company_name?.invalid" severity="error" size="small">
               {{ $form.company_name.error?.message }}
@@ -114,7 +114,7 @@
                 autocomplete="name"
                 class="text-base"
               />
-              <label for="contact_person">Contact Person</label>
+              <label for="contact_person">Personne de contact</label>
             </FloatLabel>
             <Message v-if="$form.contact_person?.invalid" severity="error" size="small">
               {{ $form.contact_person.error?.message }}
@@ -130,16 +130,16 @@
                 :invalid="$form.vat_number?.invalid"
                 class="text-base"
               />
-              <label for="vat_number">VAT Number *</label>
+              <label for="vat_number">Numéro de TVA *</label>
             </FloatLabel>
-            <small class="text-muted-color text-xs mt-1">Belgian format: BE + 10 digits</small>
+            <small class="text-muted-color text-xs mt-1">Format belge : BE + 10 chiffres</small>
             <Message v-if="$form.vat_number?.invalid" severity="error" size="small">
               {{ $form.vat_number.error?.message }}
             </Message>
           </div>
         </template>
 
-        <!-- Common Fields - Always full width on mobile -->
+        <!-- Champs communs - Toujours pleine largeur sur mobile -->
         <div class="flex flex-col gap-1 md:col-span-2">
           <FloatLabel variant="on">
             <InputText
@@ -152,7 +152,7 @@
               inputmode="email"
               class="text-base"
             />
-            <label for="email">Email Address *</label>
+            <label for="email">Adresse e-mail *</label>
           </FloatLabel>
           <Message v-if="$form.email?.invalid" severity="error" size="small">
             {{ $form.email.error?.message }}
@@ -170,9 +170,9 @@
               inputmode="tel"
               class="text-base"
             />
-            <label for="phone">Phone Number</label>
+            <label for="phone">Numéro de téléphone</label>
           </FloatLabel>
-          <small class="text-muted-color text-xs mt-1">Include country code for international numbers</small>
+          <small class="text-muted-color text-xs mt-1">Inclure l'indicatif pays pour les numéros internationaux</small>
           <Message v-if="$form.phone?.invalid" severity="error" size="small">
             {{ $form.phone.error?.message }}
           </Message>
@@ -188,7 +188,7 @@
               autocomplete="address-level2"
               class="text-base"
             />
-            <label for="city">City</label>
+            <label for="city">Ville</label>
           </FloatLabel>
           <Message v-if="$form.city?.invalid" severity="error" size="small">
             {{ $form.city.error?.message }}
@@ -206,7 +206,7 @@
               inputmode="numeric"
               class="text-base"
             />
-            <label for="postal_code">Postal Code</label>
+            <label for="postal_code">Code postal</label>
           </FloatLabel>
           <Message v-if="$form.postal_code?.invalid" severity="error" size="small">
             {{ $form.postal_code.error?.message }}
@@ -221,12 +221,12 @@
               :options="countries"
               optionLabel="label"
               optionValue="value"
-              placeholder="Select Country"
+              placeholder="Sélectionner un pays"
               fluid
               :invalid="$form.country?.invalid"
               class="text-base"
             />
-            <label for="country">Country</label>
+            <label for="country">Pays</label>
           </FloatLabel>
           <Message v-if="$form.country?.invalid" severity="error" size="small">
             {{ $form.country.error?.message }}
@@ -244,7 +244,7 @@
               autocomplete="street-address"
               class="text-base"
             />
-            <label for="address">Address</label>
+            <label for="address">Adresse</label>
           </FloatLabel>
           <Message v-if="$form.address?.invalid" severity="error" size="small">
             {{ $form.address.error?.message }}
@@ -264,7 +264,7 @@
             <label for="notes">Notes</label>
           </FloatLabel>
           <small class="text-muted-color text-xs mt-1">
-            Optional: Any special information about this {{ currentClientType === 'company' ? 'company' : 'student' }}
+            Optionnel : Toute information spéciale concernant {{ currentClientType === 'company' ? 'cette entreprise' : 'cet élève' }}
           </small>
           <Message v-if="$form.notes?.invalid" severity="error" size="small">
             {{ $form.notes.error?.message }}
@@ -272,11 +272,11 @@
         </div>
       </div>
 
-      <!-- Form Actions -->
+      <!-- Actions du formulaire -->
       <div class="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-4 border-t">
         <Button
           type="button"
-          label="Cancel"
+          label="Annuler"
           severity="secondary"
           outlined
           @click="$emit('cancel')"
@@ -284,7 +284,7 @@
         />
         <Button
           type="submit"
-          :label="isEditing ? 'Update Customer' : 'Create Customer'"
+          :label="isEditing ? 'Modifier le client' : 'Créer le client'"
           :loading="loading"
           icon="pi pi-check"
           class="w-full sm:w-auto"
@@ -320,28 +320,28 @@ export default {
       currentClientType: "individual",
 
       clientTypeOptions: [
-        { label: "Individual Student", value: "individual" },
-        { label: "Company", value: "company" },
+        { label: "Élève particulier", value: "individual" },
+        { label: "Entreprise", value: "company" },
       ],
 
       licenseTypes: [
-        { label: "Learner Permit", value: "learner" },
-        { label: "Class B (Car)", value: "B" },
-        { label: "Class A (Motorcycle)", value: "A" },
-        { label: "Class C (Truck)", value: "C" },
-        { label: "Class D (Bus)", value: "D" },
-        { label: "Class BE (Car + Trailer)", value: "BE" },
-        { label: "Class AM (Moped)", value: "AM" },
+        { label: "Permis provisoire", value: "learner" },
+        { label: "Permis B (Voiture)", value: "B" },
+        { label: "Permis A (Moto)", value: "A" },
+        { label: "Permis C (Camion)", value: "C" },
+        { label: "Permis D (Bus)", value: "D" },
+        { label: "Permis BE (Voiture + remorque)", value: "BE" },
+        { label: "Permis AM (Cyclomoteur)", value: "AM" },
       ],
 
       countries: [
-        { label: "Belgium", value: "Belgium" },
-        { label: "Netherlands", value: "Netherlands" },
+        { label: "Belgique", value: "Belgium" },
+        { label: "Pays-Bas", value: "Netherlands" },
         { label: "France", value: "France" },
-        { label: "Germany", value: "Germany" },
+        { label: "Allemagne", value: "Germany" },
         { label: "Luxembourg", value: "Luxembourg" },
-        { label: "United Kingdom", value: "United Kingdom" },
-        { label: "Other", value: "Other" },
+        { label: "Royaume-Uni", value: "United Kingdom" },
+        { label: "Autre", value: "Other" },
       ],
 
       fieldDefinitions: {
@@ -402,7 +402,7 @@ export default {
       return zodResolver(
         z.object({
           client_type: z.enum(['individual', 'company'], {
-            errorMap: () => ({ message: 'Please select a client type' })
+            errorMap: () => ({ message: 'Veuillez sélectionner un type de client' })
           }),
 
           first_name: nullableString(),
@@ -415,13 +415,13 @@ export default {
           email: z
             .union([z.string(), z.null()])
             .transform(val => val === null ? '' : val)
-            .pipe(z.string().min(1, { message: 'Email is required' }).email({ message: 'Please enter a valid email address' })),
+            .pipe(z.string().min(1, { message: 'L\'email est obligatoire' }).email({ message: 'Veuillez saisir une adresse email valide' })),
 
           phone: nullableString().refine((val) => {
             if (!val || val.trim() === '') return true
             const phoneRegex = /^[\+]?[0-9\s\-\(\)]{7,20}$/
             return phoneRegex.test(val)
-          }, { message: 'Please enter a valid phone number' }),
+          }, { message: 'Veuillez saisir un numéro de téléphone valide' }),
 
           address: nullableString(),
           city: nullableString(),
@@ -439,7 +439,7 @@ export default {
           }
           return true
         }, {
-          message: "Please fill in all required fields",
+          message: "Veuillez remplir tous les champs obligatoires",
           path: ["client_type"]
         })
       )
@@ -474,16 +474,16 @@ export default {
 
     async onFormSubmit({ valid, values }) {
       if (!valid) {
-        console.log('Form validation failed');
+        console.log('Échec de la validation du formulaire');
         return;
       }
 
       if (!values) {
-        console.error('Values is undefined');
+        console.error('Les valeurs sont indéfinies');
         this.$toast.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'Form data is missing',
+          summary: 'Erreur',
+          detail: 'Données du formulaire manquantes',
           life: 5000
         });
         return;
@@ -493,15 +493,15 @@ export default {
 
       try {
         const cleanedData = this.prepareDataForSubmission(values);
-        console.log('Original form values:', values);
-        console.log('Cleaned data for submission:', cleanedData);
+        console.log('Valeurs originales du formulaire:', values);
+        console.log('Données nettoyées pour soumission:', cleanedData);
         this.$emit("save", cleanedData);
       } catch (error) {
-        console.error("Form submission error:", error);
+        console.error("Erreur de soumission du formulaire:", error);
         this.$toast.add({
           severity: "error",
-          summary: "Error",
-          detail: "An error occurred while saving the customer",
+          summary: "Erreur",
+          detail: "Une erreur s'est produite lors de la sauvegarde du client",
           life: 5000,
         });
       } finally {
@@ -513,14 +513,14 @@ export default {
 </script>
 
 <style scoped>
-/* Mobile-first responsive improvements */
+/* Améliorations responsive mobile-first */
 @media (max-width: 768px) {
-  /* Ensure proper touch targets on mobile */
+  /* Assurer des cibles tactiles appropriées sur mobile */
   .p-inputtext,
   .p-textarea,
   .p-select {
     min-height: 48px;
-    font-size: 16px; /* Prevent zoom on iOS */
+    font-size: 16px; /* Empêcher le zoom sur iOS */
   }
 
   .p-button {
@@ -528,19 +528,19 @@ export default {
     font-size: 16px;
   }
 
-  /* Better spacing on mobile */
+  /* Meilleur espacement sur mobile */
   .gap-4 {
     gap: 1rem;
   }
 
-  /* Improved SelectButton on mobile */
+  /* SelectButton amélioré sur mobile */
   .p-selectbutton .p-button {
     padding: 0.75rem 1rem;
     font-size: 0.875rem;
   }
 }
 
-/* Smooth focus transitions */
+/* Transitions de focus fluides */
 .p-inputtext:focus,
 .p-textarea:focus,
 .p-select:focus {
@@ -549,19 +549,19 @@ export default {
   transition: all 0.2s ease;
 }
 
-/* Better error state styling */
+/* Meilleur style d'état d'erreur */
 .p-invalid {
   border-color: var(--p-red-500) !important;
   box-shadow: 0 0 0 0.2rem rgba(var(--p-red-500-rgb), 0.2) !important;
 }
 
-/* Enhanced message styling */
+/* Style de message amélioré */
 .p-message {
   border-radius: 6px;
   font-size: 0.875rem;
 }
 
-/* Improved button styling on mobile */
+/* Style de bouton amélioré sur mobile */
 @media (max-width: 640px) {
   .flex-col-reverse .p-button {
     order: 1;
@@ -572,17 +572,17 @@ export default {
   }
 }
 
-/* Better form field spacing */
+/* Meilleur espacement des champs de formulaire */
 .flex.flex-col.gap-1 {
   gap: 0.25rem;
 }
 
-/* Small text improvements */
+/* Améliorations du petit texte */
 small {
   line-height: 1.4;
 }
 
-/* Focus visible for accessibility */
+/* Focus visible pour l'accessibilité */
 .p-button:focus-visible,
 .p-inputtext:focus-visible,
 .p-textarea:focus-visible,
@@ -591,7 +591,7 @@ small {
   outline-offset: 2px;
 }
 
-/* Smooth transitions for dynamic fields */
+/* Transitions fluides pour les champs dynamiques */
 .grid > div {
   transition: opacity 0.2s ease;
 }

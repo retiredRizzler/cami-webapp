@@ -2,7 +2,7 @@
   <Card>
     <template #header>
       <div class="flex items-center justify-between p-6 pb-0">
-        <h3 class="text-lg font-semibold text-primary">Address & Contact</h3>
+        <h3 class="text-lg font-semibold text-primary">Adresse & Contact</h3>
         <div class="flex items-center gap-2">
           <i class="pi pi-map-marker text-primary"></i>
           <Button
@@ -12,7 +12,7 @@
             severity="secondary"
             text
             @click="startEditing"
-            v-tooltip.top="'Edit address and contact information'"
+            v-tooltip.top="'Modifier les informations d\'adresse et de contact'"
           />
         </div>
       </div>
@@ -21,24 +21,24 @@
       <!-- Display Mode -->
       <div v-if="!isEditing" class="space-y-4">
         <div v-if="profile?.address" class="flex justify-between">
-          <span class="text-muted-color font-medium">Address:</span>
+          <span class="text-muted-color font-medium">Adresse :</span>
           <span class="text-right max-w-xs">{{ profile.address }}</span>
         </div>
         <div v-if="profile?.city || profile?.postal_code" class="flex justify-between">
-          <span class="text-muted-color font-medium">City:</span>
+          <span class="text-muted-color font-medium">Ville :</span>
           <span>{{ profile.postal_code }} {{ profile.city }}</span>
         </div>
         <div v-if="profile?.country" class="flex justify-between">
-          <span class="text-muted-color font-medium">Country:</span>
+          <span class="text-muted-color font-medium">Pays :</span>
           <span>{{ profile.country }}</span>
         </div>
 
         <!-- Empty state -->
         <div v-if="!hasAddressInfo" class="text-center py-6 text-muted-color">
           <i class="pi pi-map-marker text-2xl mb-2 block"></i>
-          <p class="mb-3">No address information configured</p>
+          <p class="mb-3">Aucune information d'adresse configurée</p>
           <Button
-            label="Add Address"
+            label="Ajouter Adresse"
             icon="pi pi-plus"
             size="small"
             @click="startEditing"
@@ -65,7 +65,7 @@
                 fluid
                 :invalid="$form.address?.invalid"
               />
-              <label for="address">Street Address</label>
+              <label for="address">Adresse de la rue</label>
             </FloatLabel>
             <Message v-if="$form.address?.invalid" severity="error" size="small">
               {{ $form.address.error?.message }}
@@ -82,7 +82,7 @@
                   fluid
                   :invalid="$form.city?.invalid"
                 />
-                <label for="city">City</label>
+                <label for="city">Ville</label>
               </FloatLabel>
               <Message v-if="$form.city?.invalid" severity="error" size="small">
                 {{ $form.city.error?.message }}
@@ -97,7 +97,7 @@
                   fluid
                   :invalid="$form.postal_code?.invalid"
                 />
-                <label for="postal_code">Postal Code</label>
+                <label for="postal_code">Code Postal</label>
               </FloatLabel>
               <Message v-if="$form.postal_code?.invalid" severity="error" size="small">
                 {{ $form.postal_code.error?.message }}
@@ -117,7 +117,7 @@
                 fluid
                 :invalid="$form.country?.invalid"
               />
-              <label for="country">Country</label>
+              <label for="country">Pays</label>
             </FloatLabel>
             <Message v-if="$form.country?.invalid" severity="error" size="small">
               {{ $form.country.error?.message }}
@@ -128,14 +128,14 @@
           <div class="flex justify-end gap-2 pt-4 border-t">
             <Button
               type="button"
-              label="Cancel"
+              label="Annuler"
               severity="secondary"
               outlined
               @click="cancelEditing"
             />
             <Button
               type="submit"
-              label="Save Changes"
+              label="Enregistrer"
               :loading="saving"
               icon="pi pi-check"
             />
@@ -169,13 +169,13 @@ export default {
       editData: {},
 
       countries: [
-        { label: "Belgium", value: "Belgium" },
-        { label: "Netherlands", value: "Netherlands" },
+        { label: "Belgique", value: "Belgium" },
+        { label: "Pays-Bas", value: "Netherlands" },
         { label: "France", value: "France" },
-        { label: "Germany", value: "Germany" },
+        { label: "Allemagne", value: "Germany" },
         { label: "Luxembourg", value: "Luxembourg" },
-        { label: "United Kingdom", value: "United Kingdom" },
-        { label: "Other", value: "Other" },
+        { label: "Royaume-Uni", value: "United Kingdom" },
+        { label: "Autre", value: "Other" },
       ],
     };
   },
@@ -254,7 +254,7 @@ export default {
     formatDate(dateString) {
       if (!dateString) return '';
       const date = new Date(dateString);
-      return date.toLocaleDateString('en-GB', {
+      return date.toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',

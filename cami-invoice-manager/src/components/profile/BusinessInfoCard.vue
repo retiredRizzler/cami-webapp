@@ -2,7 +2,7 @@
   <Card>
     <template #header>
       <div class="flex items-center justify-between p-6 pb-0">
-        <h3 class="text-lg font-semibold text-primary">Business Information</h3>
+        <h3 class="text-lg font-semibold text-primary">Informations Commerciales</h3>
         <div class="flex items-center gap-2">
           <i class="pi pi-building text-primary"></i>
           <Button
@@ -12,7 +12,7 @@
             severity="secondary"
             text
             @click="startEditing"
-            v-tooltip.top="'Edit business information'"
+            v-tooltip.top="'Modifier les informations commerciales'"
           />
         </div>
       </div>
@@ -21,36 +21,36 @@
       <!-- Display Mode -->
       <div v-if="!isEditing" class="space-y-4">
         <div v-if="profile?.business_name" class="flex justify-between">
-          <span class="text-muted-color font-medium">Business Name:</span>
+          <span class="text-muted-color font-medium">Nom de l'Entreprise :</span>
           <span class="font-semibold">{{ profile.business_name }}</span>
         </div>
         <div v-if="profile?.first_name || profile?.last_name" class="flex justify-between">
-          <span class="text-muted-color font-medium">Owner:</span>
+          <span class="text-muted-color font-medium">Propriétaire :</span>
           <span>{{ profile.first_name }} {{ profile.last_name }}</span>
         </div>
         <div v-if="profile?.email" class="flex justify-between">
-          <span class="text-muted-color font-medium">Email:</span>
+          <span class="text-muted-color font-medium">Email :</span>
           <span>{{ profile.email }}</span>
         </div>
         <div v-if="profile?.phone" class="flex justify-between">
-          <span class="text-muted-color font-medium">Phone:</span>
+          <span class="text-muted-color font-medium">Téléphone :</span>
           <span>{{ profile.phone }}</span>
         </div>
         <div v-if="profile?.vat_number" class="flex justify-between">
-          <span class="text-muted-color font-medium">VAT Number:</span>
+          <span class="text-muted-color font-medium">Numéro TVA :</span>
           <span>{{ profile.vat_number }}</span>
         </div>
         <div v-if="profile?.license_number" class="flex justify-between">
-          <span class="text-muted-color font-medium">License Number:</span>
+          <span class="text-muted-color font-medium">Numéro de Licence :</span>
           <span>{{ profile.license_number }}</span>
         </div>
 
         <!-- Empty state for new profiles -->
         <div v-if="!profile" class="text-center py-6 text-muted-color">
           <i class="pi pi-building text-2xl mb-2 block"></i>
-          <p class="mb-3">No business information configured</p>
+          <p class="mb-3">Aucune information commerciale configurée</p>
           <Button
-            label="Add Business Info"
+            label="Ajouter Info Commerciale"
             icon="pi pi-plus"
             size="small"
             @click="startEditing"
@@ -76,7 +76,7 @@
                 fluid
                 :invalid="$form.business_name?.invalid"
               />
-              <label for="business_name">Business/School Name *</label>
+              <label for="business_name">Nom de l'Entreprise/École *</label>
             </FloatLabel>
             <Message v-if="$form.business_name?.invalid" severity="error" size="small">
               {{ $form.business_name.error?.message }}
@@ -93,7 +93,7 @@
                   fluid
                   :invalid="$form.first_name?.invalid"
                 />
-                <label for="first_name">First Name *</label>
+                <label for="first_name">Prénom *</label>
               </FloatLabel>
               <Message v-if="$form.first_name?.invalid" severity="error" size="small">
                 {{ $form.first_name.error?.message }}
@@ -108,7 +108,7 @@
                   fluid
                   :invalid="$form.last_name?.invalid"
                 />
-                <label for="last_name">Last Name *</label>
+                <label for="last_name">Nom *</label>
               </FloatLabel>
               <Message v-if="$form.last_name?.invalid" severity="error" size="small">
                 {{ $form.last_name.error?.message }}
@@ -127,7 +127,7 @@
                   fluid
                   :invalid="$form.email?.invalid"
                 />
-                <label for="email">Email Address *</label>
+                <label for="email">Adresse Email *</label>
               </FloatLabel>
               <Message v-if="$form.email?.invalid" severity="error" size="small">
                 {{ $form.email.error?.message }}
@@ -142,7 +142,7 @@
                   fluid
                   :invalid="$form.phone?.invalid"
                 />
-                <label for="phone">Phone Number</label>
+                <label for="phone">Numéro de Téléphone</label>
               </FloatLabel>
               <Message v-if="$form.phone?.invalid" severity="error" size="small">
                 {{ $form.phone.error?.message }}
@@ -161,12 +161,12 @@
                   fluid
                   :invalid="$form.vat_number?.invalid"
                 />
-                <label for="vat_number">VAT Number</label>
+                <label for="vat_number">Numéro TVA</label>
               </FloatLabel>
               <Message v-if="$form.vat_number?.invalid" severity="error" size="small">
                 {{ $form.vat_number.error?.message }}
               </Message>
-              <small class="text-muted-color">Format: BE followed by 10 digits</small>
+              <small class="text-muted-color">Format : BE suivi de 10 chiffres</small>
             </div>
 
             <div class="flex flex-col gap-1">
@@ -177,7 +177,7 @@
                   fluid
                   :invalid="$form.license_number?.invalid"
                 />
-                <label for="license_number">Instructor License</label>
+                <label for="license_number">Licence Instructeur</label>
               </FloatLabel>
               <Message v-if="$form.license_number?.invalid" severity="error" size="small">
                 {{ $form.license_number.error?.message }}
@@ -189,14 +189,14 @@
           <div class="flex justify-end gap-2 pt-4 border-t">
             <Button
               type="button"
-              label="Cancel"
+              label="Annuler"
               severity="secondary"
               outlined
               @click="cancelEditing"
             />
             <Button
               type="submit"
-              label="Save Changes"
+              label="Enregistrer"
               :loading="saving"
               icon="pi pi-check"
             />
@@ -235,22 +235,22 @@ export default {
     resolver() {
       return zodResolver(
         z.object({
-          business_name: z.string().min(1, { message: 'Business name is required' }),
-          first_name: z.string().min(1, { message: 'First name is required' }),
-          last_name: z.string().min(1, { message: 'Last name is required' }),
-          email: z.string().min(1, { message: 'Email is required' }).email({ message: 'Please enter a valid email address' }),
+          business_name: z.string().min(1, { message: 'Le nom de l\'entreprise est requis' }),
+          first_name: z.string().min(1, { message: 'Le prénom est requis' }),
+          last_name: z.string().min(1, { message: 'Le nom est requis' }),
+          email: z.string().min(1, { message: 'L\'email est requis' }).email({ message: 'Veuillez entrer une adresse email valide' }),
 
           phone: z.string().optional().refine((val) => {
             if (!val || val.trim() === '') return true
             const phoneRegex = /^[\+]?[0-9\s\-\(\)]{7,20}$/
             return phoneRegex.test(val)
-          }, { message: 'Please enter a valid phone number' }),
+          }, { message: 'Veuillez entrer un numéro de téléphone valide' }),
 
           vat_number: z.string().optional().refine((val) => {
             if (!val || val.trim() === '') return true
             const vatRegex = /^BE[0-9]{10}$/
             return vatRegex.test(val.replace(/\s/g, '').toUpperCase())
-          }, { message: 'Belgian VAT format: BE followed by 10 digits' }),
+          }, { message: 'Format TVA belge : BE suivi de 10 chiffres' }),
 
           license_number: z.string().optional(),
         })

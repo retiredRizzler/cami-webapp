@@ -2,7 +2,7 @@
   <Card>
     <template #header>
       <div class="flex items-center justify-between p-6 pb-0">
-        <h3 class="text-lg font-semibold text-primary">Invoice Settings</h3>
+        <h3 class="text-lg font-semibold text-primary">Paramètres de Facturation</h3>
         <div class="flex items-center gap-2">
           <i class="pi pi-receipt text-primary"></i>
           <Button
@@ -12,7 +12,7 @@
             severity="secondary"
             text
             @click="startEditing"
-            v-tooltip.top="'Edit invoice settings'"
+            v-tooltip.top="'Modifier les paramètres de facturation'"
           />
         </div>
       </div>
@@ -21,32 +21,32 @@
       <!-- Display Mode -->
       <div v-if="!isEditing" class="space-y-4">
         <div class="flex justify-between">
-          <span class="text-muted-color font-medium">Default Tax Rate:</span>
+          <span class="text-muted-color font-medium">Taux de TVA par Défaut :</span>
           <span class="font-semibold">{{ profile?.default_tax_rate || 21 }}%</span>
         </div>
         <div v-if="profile?.default_payment_terms" class="flex justify-between">
-          <span class="text-muted-color font-medium">Payment Terms:</span>
+          <span class="text-muted-color font-medium">Conditions de Paiement :</span>
           <span class="text-right max-w-xs">{{ profile.default_payment_terms }}</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-muted-color font-medium">Logo:</span>
+          <span class="text-muted-color font-medium">Logo :</span>
           <span v-if="profile?.logo_url" class="text-green-600">
-            <i class="pi pi-check mr-1"></i>Configured
+            <i class="pi pi-check mr-1"></i>Configuré
           </span>
-          <span v-else class="text-muted-color">Not configured</span>
+          <span v-else class="text-muted-color">Non configuré</span>
         </div>
 
         <!-- Logo Preview -->
         <div v-if="profile?.logo_url" class="pt-3 border-t">
-          <div class="text-sm text-muted-color mb-2">Current Logo:</div>
-          <img :src="profile.logo_url" alt="Business logo" class="max-h-16 max-w-32 object-contain border rounded" />
+          <div class="text-sm text-muted-color mb-2">Logo Actuel :</div>
+          <img :src="profile.logo_url" alt="Logo de l'entreprise" class="max-h-16 max-w-32 object-contain border rounded" />
         </div>
 
         <!-- Settings Summary -->
         <div class="pt-3 border-t">
           <div class="flex items-center gap-2">
             <i class="pi pi-info-circle text-blue-600"></i>
-            <span class="text-sm text-blue-600">These settings will be used as defaults for new invoices</span>
+            <span class="text-sm text-blue-600">Ces paramètres seront utilisés par défaut pour les nouvelles factures</span>
           </div>
         </div>
       </div>
@@ -75,12 +75,12 @@
                 fluid
                 :invalid="$form.default_tax_rate?.invalid"
               />
-              <label for="default_tax_rate">Default Tax Rate</label>
+              <label for="default_tax_rate">Taux de TVA par Défaut</label>
             </FloatLabel>
             <Message v-if="$form.default_tax_rate?.invalid" severity="error" size="small">
               {{ $form.default_tax_rate.error?.message }}
             </Message>
-            <small class="text-muted-color">Standard VAT rate in Belgium is 21%</small>
+            <small class="text-muted-color">Le taux de TVA standard en Belgique est de 21%</small>
           </div>
 
           <!-- Default Payment Terms -->
@@ -93,26 +93,26 @@
                 fluid
                 :invalid="$form.default_payment_terms?.invalid"
               />
-              <label for="default_payment_terms">Default Payment Terms</label>
+              <label for="default_payment_terms">Conditions de Paiement par Défaut</label>
             </FloatLabel>
             <Message v-if="$form.default_payment_terms?.invalid" severity="error" size="small">
               {{ $form.default_payment_terms.error?.message }}
             </Message>
-            <small class="text-muted-color">This text will appear on all your invoices by default</small>
+            <small class="text-muted-color">Ce texte apparaîtra sur toutes vos factures par défaut</small>
           </div>
 
           <!-- Form Actions -->
           <div class="flex justify-end gap-2 pt-4 border-t">
             <Button
               type="button"
-              label="Cancel"
+              label="Annuler"
               severity="secondary"
               outlined
               @click="cancelEditing"
             />
             <Button
               type="submit"
-              label="Save Changes"
+              label="Enregistrer"
               :loading="saving"
               icon="pi pi-check"
             />
@@ -175,7 +175,7 @@ export default {
       this.currentLogoUrl = this.profile?.logo_url;
       this.editData = {
         default_tax_rate: this.profile?.default_tax_rate || 21.00,
-        default_payment_terms: this.profile?.default_payment_terms || 'Payment due within 30 days',
+        default_payment_terms: this.profile?.default_payment_terms || 'Paiement dû sous 30 jours',
         logo_url: this.profile?.logo_url || '',
       };
     },
@@ -211,7 +211,7 @@ export default {
 
       // Convert empty strings to null for optional fields
       if (cleaned.default_payment_terms === '' || cleaned.default_payment_terms === undefined) {
-        cleaned.default_payment_terms = 'Payment due within 30 days';
+        cleaned.default_payment_terms = 'Paiement dû sous 30 jours';
       }
 
       if (cleaned.logo_url === '' || cleaned.logo_url === undefined) {
@@ -230,8 +230,8 @@ export default {
       console.log('Logo selected:', event.files[0]);
       this.$toast.add({
         severity: 'info',
-        summary: 'Upload Not Available',
-        detail: 'Logo upload functionality will be available in a future update',
+        summary: 'Téléchargement Non Disponible',
+        detail: 'La fonctionnalité de téléchargement de logo sera disponible dans une prochaine mise à jour',
         life: 4000
       });
     },
@@ -240,8 +240,8 @@ export default {
       console.error('Logo upload error:', event);
       this.$toast.add({
         severity: 'error',
-        summary: 'Upload Error',
-        detail: 'Failed to upload logo. Please try again.',
+        summary: 'Erreur de Téléchargement',
+        detail: 'Échec du téléchargement du logo. Veuillez réessayer.',
         life: 5000
       });
     },

@@ -7,7 +7,7 @@
       @submit="onFormSubmit"
       class="flex flex-col gap-6"
     >
-      <!-- Invoice Header Information -->
+      <!-- Informations d'en-tête de la facture -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
           <FloatLabel variant="on">
@@ -22,7 +22,7 @@
               :invalid="$form.customer_id?.invalid"
               :loading="customersLoading"
             />
-            <label for="customer_id">Customer *</label>
+            <label for="customer_id">Client *</label>
           </FloatLabel>
           <Message v-if="$form.customer_id?.invalid" severity="error" size="small">
             {{ $form.customer_id.error?.message }}
@@ -37,8 +37,10 @@
               fluid
               :invalid="$form.invoice_date?.invalid"
               dateFormat="dd/mm/yy"
+              :manualInput="false"
+              @update:modelValue="onInvoiceDateChange"
             />
-            <label for="invoice_date">Invoice Date *</label>
+            <label for="invoice_date">Date de facture *</label>
           </FloatLabel>
           <Message v-if="$form.invoice_date?.invalid" severity="error" size="small">
             {{ $form.invoice_date.error?.message }}
@@ -53,8 +55,10 @@
               fluid
               :invalid="$form.due_date?.invalid"
               dateFormat="dd/mm/yy"
+              :manualInput="false"
+              @update:modelValue="onDueDateChange"
             />
-            <label for="due_date">Due Date</label>
+            <label for="due_date">Date d'échéance</label>
           </FloatLabel>
           <Message v-if="$form.due_date?.invalid" severity="error" size="small">
             {{ $form.due_date.error?.message }}
@@ -72,7 +76,7 @@
               fluid
               :invalid="$form.status?.invalid"
             />
-            <label for="status">Status</label>
+            <label for="status">Statut</label>
           </FloatLabel>
           <Message v-if="$form.status?.invalid" severity="error" size="small">
             {{ $form.status.error?.message }}
@@ -91,9 +95,9 @@
               showButtons
               fluid
               :invalid="$form.tax_rate?.invalid"
-              @input="onTaxRateChange"
+              @update:modelValue="onTaxRateChange"
             />
-            <label for="tax_rate">Tax Rate (%)</label>
+            <label for="tax_rate">Taux de TVA (%)</label>
           </FloatLabel>
           <Message v-if="$form.tax_rate?.invalid" severity="error" size="small">
             {{ $form.tax_rate.error?.message }}
@@ -101,21 +105,27 @@
         </div>
       </div>
 
-      <!-- Invoice Items Section -->
+      <!-- Section des articles de facture -->
       <div>
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">Invoice Items</h3>
-          <Button type="button" icon="pi pi-plus" label="Add Item" size="small" @click="addItem" />
+          <h3 class="text-lg font-semibold">Articles de la facture</h3>
+          <Button
+            type="button"
+            icon="pi pi-plus"
+            label="Ajouter un article"
+            size="small"
+            @click="addItem"
+          />
         </div>
 
-        <!-- Items List -->
+        <!-- Liste des articles -->
         <div v-if="invoiceItems.length > 0" class="space-y-4">
           <div
             v-for="(item, index) in invoiceItems"
             :key="index"
             class="border rounded p-4 bg-surface-50"
           >
-            <!-- Service Type Selection -->
+            <!-- Sélection du type de service -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
               <div class="md:col-span-2">
                 <FloatLabel variant="on">
@@ -124,7 +134,7 @@
                     :options="serviceTypes"
                     optionLabel="name"
                     optionValue="id"
-                    placeholder="Select Service Type"
+                    placeholder="Sélectionner un type de service"
                     filter
                     fluid
                     @change="onServiceTypeChange(index, $event)"
@@ -145,14 +155,14 @@
                             <div class="font-medium">{{ slotProps.option.name }}</div>
                             <div class="text-xs text-muted-color">
                               €{{ slotProps.option.unit_price }}/{{
-                                slotProps.option.pricing_type
+                                translatePricingType(slotProps.option.pricing_type)
                               }}
-                              • {{ slotProps.option.category }}
+                              • {{ translateCategory(slotProps.option.category) }}
                             </div>
                           </div>
                         </div>
                         <Tag
-                          :value="slotProps.option.pricing_type"
+                          :value="translatePricingType(slotProps.option.pricing_type)"
                           :severity="getPricingTypeSeverity(slotProps.option.pricing_type)"
                           size="small"
                         />
@@ -160,13 +170,13 @@
                     </template>
 
                     <template #header>
-                      <div class="font-medium p-3 border-b">Available Service Types</div>
+                      <div class="font-medium p-3 border-b">Types de services disponibles</div>
                     </template>
 
                     <template #footer>
                       <div class="p-3 border-t">
                         <Button
-                          label="Add New Service Type"
+                          label="Ajouter un nouveau type de service"
                           fluid
                           severity="secondary"
                           text
@@ -182,7 +192,7 @@
               </div>
             </div>
 
-            <!-- Item Details -->
+            <!-- Détails de l'article -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
               <div class="md:col-span-2">
                 <FloatLabel variant="on">
@@ -200,9 +210,9 @@
                     :maxFractionDigits="2"
                     :min="0.01"
                     fluid
-                    @input="calculateItemTotal(index)"
+                    @update:modelValue="calculateItemTotal(index)"
                   />
-                  <label>Quantity</label>
+                  <label>Quantité</label>
                 </FloatLabel>
               </div>
 
@@ -212,16 +222,16 @@
                     v-model="item.unit_price"
                     mode="currency"
                     currency="EUR"
-                    locale="de-DE"
+                    locale="fr-FR"
                     fluid
-                    @input="calculateItemTotal(index)"
+                    @update:modelValue="calculateItemTotal(index)"
                   />
-                  <label>Unit Price</label>
+                  <label>Prix unitaire</label>
                 </FloatLabel>
               </div>
             </div>
 
-            <!-- Additional Details -->
+            <!-- Détails supplémentaires -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
               <div>
                 <FloatLabel variant="on">
@@ -234,14 +244,20 @@
                     suffix="h"
                     fluid
                   />
-                  <label>Duration</label>
+                  <label>Durée</label>
                 </FloatLabel>
               </div>
 
               <div>
                 <FloatLabel variant="on">
-                  <DatePicker v-model="item.service_date" fluid dateFormat="dd/mm/yy" />
-                  <label>Service Date</label>
+                  <DatePicker
+                    v-model="item.service_date"
+                    fluid
+                    dateFormat="dd/mm/yy"
+                    :manualInput="false"
+                    @update:modelValue="(newDate) => onServiceDateChange(index, newDate)"
+                  />
+                  <label>Date de service</label>
                 </FloatLabel>
               </div>
 
@@ -259,41 +275,43 @@
                   severity="danger"
                   text
                   @click="removeItem(index)"
-                  v-tooltip.top="'Remove Item'"
+                  v-tooltip.top="'Supprimer l\'article'"
                 />
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Empty State -->
+        <!-- État vide -->
         <div v-else class="text-center py-8 border-2 border-dashed border-surface-300 rounded">
           <i class="pi pi-plus text-2xl text-muted-color mb-2"></i>
-          <p class="text-muted-color">No items added yet. Click "Add Item" to get started.</p>
+          <p class="text-muted-color">
+            Aucun article ajouté. Cliquez sur "Ajouter un article" pour commencer.
+          </p>
         </div>
       </div>
 
-      <!-- Invoice Totals -->
+      <!-- Totaux de la facture -->
       <div v-if="invoiceItems.length > 0" class="border-t pt-4">
         <div class="flex justify-end">
           <div class="w-80 space-y-2">
             <div class="flex justify-between">
-              <span>Subtotal:</span>
+              <span>Sous-total :</span>
               <span>€{{ subtotal.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between">
-              <span>VAT ({{ currentTaxRate }}%):</span>
+              <span>TVA ({{ currentTaxRate }}%) :</span>
               <span>€{{ taxAmount.toFixed(2) }}</span>
             </div>
             <div class="flex justify-between font-bold text-lg border-t pt-2">
-              <span>Total:</span>
+              <span>Total TTC :</span>
               <span>€{{ totalAmount.toFixed(2) }}</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Notes and Payment Terms -->
+      <!-- Notes et conditions de paiement -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div class="flex flex-col gap-1">
           <FloatLabel variant="on">
@@ -314,7 +332,7 @@
               fluid
               :invalid="$form.payment_terms?.invalid"
             />
-            <label for="payment_terms">Payment Terms</label>
+            <label for="payment_terms">Conditions de paiement</label>
           </FloatLabel>
           <Message v-if="$form.payment_terms?.invalid" severity="error" size="small">
             {{ $form.payment_terms.error?.message }}
@@ -322,28 +340,28 @@
         </div>
       </div>
 
-      <!-- Form Actions -->
+      <!-- Actions du formulaire -->
       <div class="flex justify-end gap-2 pt-4 border-t">
         <Button
           type="button"
-          label="Cancel"
+          label="Annuler"
           severity="secondary"
           outlined
           @click="$emit('cancel')"
         />
         <Button
           type="submit"
-          :label="isEditing ? 'Update Invoice' : 'Create Invoice'"
+          :label="isEditing ? 'Modifier la facture' : 'Créer la facture'"
           :loading="loading"
           icon="pi pi-check"
         />
       </div>
     </Form>
 
-    <!-- Add Service Type Dialog -->
+    <!-- Dialogue d'ajout de type de service -->
     <Dialog
       v-model:visible="showAddServiceDialog"
-      header="Add New Service Type"
+      header="Ajouter un nouveau type de service"
       modal
       class="w-full max-w-md"
       :closable="true"
@@ -392,14 +410,18 @@ export default {
       invoiceItems: [],
       currentTaxRate: 21.0,
 
+      // Variables locales pour les dates (fix timezone)
+      invoiceDateLocal: null,
+      dueDateLocal: null,
+
       statusOptions: [
-        { label: "Draft", value: "draft" },
-        { label: "Sent", value: "sent" },
-        { label: "Paid", value: "paid" },
-        { label: "Cancelled", value: "cancelled" },
+        { label: "Brouillon", value: "draft" },
+        { label: "Envoyée", value: "sent" },
+        { label: "Payée", value: "paid" },
+        { label: "Annulée", value: "cancelled" },
       ],
 
-      // Service instances
+      // Services instances
       invoicesService: new InvoicesService(),
       serviceTypesService: new ServiceTypesService(),
     };
@@ -418,7 +440,7 @@ export default {
         status: "draft",
         tax_rate: 21.0,
         notes: "",
-        payment_terms: "Payment due within 30 days",
+        payment_terms: "Paiement dû dans les 30 jours",
       };
 
       if (this.invoice) {
@@ -426,7 +448,7 @@ export default {
           const value = this.invoice[key];
           if (value !== undefined && value !== null) {
             if (key === "invoice_date" || key === "due_date") {
-              baseValues[key] = value ? new Date(value) : null;
+              baseValues[key] = this.convertToLocalDate(value);
             } else {
               baseValues[key] = value;
             }
@@ -438,9 +460,17 @@ export default {
         if (this.invoice.invoice_items) {
           this.invoiceItems = this.invoice.invoice_items.map((item) => ({
             ...item,
-            service_date: item.service_date ? new Date(item.service_date) : null,
+            service_date: item.service_date ? this.convertToLocalDate(item.service_date) : null,
           }));
         }
+
+        // Initialiser les dates locales
+        this.invoiceDateLocal = baseValues.invoice_date;
+        this.dueDateLocal = baseValues.due_date;
+      } else {
+        // Pour un nouveau formulaire
+        this.invoiceDateLocal = now;
+        this.dueDateLocal = dueDate;
       }
 
       return baseValues;
@@ -450,8 +480,8 @@ export default {
       return zodResolver(
         z
           .object({
-            customer_id: z.string().min(1, { message: "Customer is required" }),
-            invoice_date: z.date({ required_error: "Invoice date is required" }),
+            customer_id: z.string().min(1, { message: "Le client est obligatoire" }),
+            invoice_date: z.date({ required_error: "La date de facture est obligatoire" }),
             due_date: z.date().optional(),
             status: z.enum(["draft", "sent", "paid", "overdue", "cancelled"]).optional(),
             tax_rate: z.number().min(0).max(100).optional(),
@@ -466,7 +496,7 @@ export default {
               return true;
             },
             {
-              message: "Due date must be after invoice date",
+              message: "La date d'échéance doit être postérieure à la date de facture",
               path: ["due_date"],
             }
           )
@@ -496,8 +526,8 @@ export default {
       try {
         this.customers = await this.invoicesService.getCustomersForInvoice();
       } catch (error) {
-        console.error("Error loading customers:", error);
-        this.showToast("error", "Error", "Failed to load customers");
+        console.error("Erreur lors du chargement des clients:", error);
+        this.showToast("error", "Erreur", "Échec du chargement des clients");
       } finally {
         this.customersLoading = false;
       }
@@ -508,11 +538,80 @@ export default {
       try {
         this.serviceTypes = await this.serviceTypesService.getServiceTypes();
       } catch (error) {
-        console.error("Error loading service types:", error);
-        this.showToast("error", "Error", "Failed to load service types");
+        console.error("Erreur lors du chargement des types de services:", error);
+        this.showToast("error", "Erreur", "Échec du chargement des types de services");
       } finally {
         this.serviceTypesLoading = false;
       }
+    },
+
+    /**
+     * Convertit une date en date locale sans décalage timezone
+     */
+    convertToLocalDate(date) {
+      if (!date) return null;
+
+      // Si c'est déjà un objet Date, créer une nouvelle date locale
+      if (date instanceof Date) {
+        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+      }
+
+      // Si c'est une string, la parser correctement
+      if (typeof date === "string") {
+        const parts = date.split("-");
+        if (parts.length === 3) {
+          return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        }
+      }
+
+      return date;
+    },
+
+    /**
+     * Convertit une date locale en format ISO string (YYYY-MM-DD)
+     */
+    convertToISODateString(date) {
+      if (!date) return null;
+
+      // Assurer qu'on a un objet Date
+      const dateObj = date instanceof Date ? date : new Date(date);
+
+      // Utiliser les méthodes locales pour éviter les problèmes de timezone
+      const year = dateObj.getFullYear();
+      const month = String(dateObj.getMonth() + 1).padStart(2, "0");
+      const day = String(dateObj.getDate()).padStart(2, "0");
+
+      return `${year}-${month}-${day}`;
+    },
+
+    /**
+     * Gestion du changement de date de facture
+     */
+    onInvoiceDateChange(newDate) {
+      console.log("Date de facture changée:", newDate);
+      this.invoiceDateLocal = this.convertToLocalDate(newDate);
+
+      // Auto-calculer la due date (30 jours après)
+      if (this.invoiceDateLocal && !this.dueDateLocal) {
+        const dueDate = new Date(this.invoiceDateLocal);
+        dueDate.setDate(dueDate.getDate() + 30);
+        this.dueDateLocal = dueDate;
+      }
+    },
+
+    /**
+     * Gestion du changement de date d'échéance
+     */
+    onDueDateChange(newDate) {
+      console.log("Date d'échéance changée:", newDate);
+      this.dueDateLocal = this.convertToLocalDate(newDate);
+    },
+
+    /**
+     * Gestion du changement de date de service pour un article
+     */
+    onServiceDateChange(index, newDate) {
+      this.invoiceItems[index].service_date = this.convertToLocalDate(newDate);
     },
 
     addItem() {
@@ -543,11 +642,22 @@ export default {
 
     calculateItemTotal(index) {
       const item = this.invoiceItems[index];
-      item.total_price = (item.unit_price || 0) * (item.quantity || 1);
+      const unitPrice = parseFloat(item.unit_price) || 0;
+      const quantity = parseFloat(item.quantity) || 0;
+      item.total_price = unitPrice * quantity;
     },
 
     onTaxRateChange(value) {
-      this.currentTaxRate = value || 21.0;
+      // Extraction de la valeur numérique seulement
+      const numericValue =
+        typeof value === "object" && value !== null
+          ? value.value !== undefined
+            ? value.value
+            : parseFloat(value.formattedValue || 0)
+          : parseFloat(value) || 0;
+
+      this.currentTaxRate = numericValue;
+      console.log("Taux de TVA changé à:", this.currentTaxRate);
     },
 
     openAddServiceDialog() {
@@ -561,7 +671,7 @@ export default {
     async onServiceTypeSaved(newServiceType) {
       this.serviceTypes.push(newServiceType);
       this.serviceTypes.sort((a, b) => a.name.localeCompare(b.name));
-      this.showToast("success", "Success", "Service type added successfully");
+      this.showToast("success", "Succès", "Type de service ajouté avec succès");
       this.closeAddServiceDialog();
     },
 
@@ -579,45 +689,66 @@ export default {
       return severityMap[pricingType] || "secondary";
     },
 
+    translatePricingType(pricingType) {
+      const translations = {
+        hourly: "horaire",
+        fixed: "fixe",
+        monthly: "mensuel",
+      };
+      return translations[pricingType] || pricingType;
+    },
+
+    translateCategory(category) {
+      const translations = {
+        individual_lesson: "leçon individuelle",
+        corporate_service: "service d'entreprise",
+        monthly_contract: "contrat mensuel",
+      };
+      return translations[category] || category;
+    },
+
     prepareInvoiceData(formValues) {
       const invoiceData = {
         ...formValues,
-        invoice_date: formValues.invoice_date
-          ? formValues.invoice_date.toISOString().split("T")[0]
-          : null,
-        due_date: formValues.due_date ? formValues.due_date.toISOString().split("T")[0] : null,
-        tax_rate: this.currentTaxRate,
+        // Utiliser les dates locales converties au lieu des dates du formulaire
+        invoice_date: this.convertToISODateString(this.invoiceDateLocal || formValues.invoice_date),
+        due_date: this.convertToISODateString(this.dueDateLocal || formValues.due_date),
+        tax_rate: parseFloat(this.currentTaxRate) || 21.0,
       };
 
       const itemsData = this.invoiceItems.map((item) => ({
         ...item,
-        service_date: item.service_date ? item.service_date.toISOString().split("T")[0] : null,
+        service_date: item.service_date ? this.convertToISODateString(item.service_date) : null,
+        unit_price: parseFloat(item.unit_price) || 0,
+        quantity: parseFloat(item.quantity) || 0,
+        total_price: parseFloat(item.total_price) || 0,
       }));
 
+      console.log("Données de facture préparées:", invoiceData);
       return { invoice: invoiceData, items: itemsData };
     },
 
     validateItems() {
       if (this.invoiceItems.length === 0) {
-        this.showToast("warn", "Warning", "Please add at least one item to the invoice");
+        this.showToast("warn", "Attention", "Veuillez ajouter au moins un article à la facture");
         return false;
       }
 
       const itemErrors = [];
       this.invoiceItems.forEach((item, index) => {
         if (!item.description || item.description.trim() === "") {
-          itemErrors.push(`Item ${index + 1}: Description is required`);
+          itemErrors.push(`Article ${index + 1} : La description est obligatoire`);
         }
         if (!item.unit_price || item.unit_price <= 0) {
-          itemErrors.push(`Item ${index + 1}: Valid unit price is required`);
+          itemErrors.push(`Article ${index + 1} : Un prix unitaire valide est obligatoire`);
         }
         if (!item.quantity || item.quantity <= 0) {
-          itemErrors.push(`Item ${index + 1}: Valid quantity is required`);
+          itemErrors.push(`Article ${index + 1} : Une quantité valide est obligatoire`);
         }
       });
 
       if (itemErrors.length > 0) {
-        this.showToast("error", "Validation Error", itemErrors.join(", "));
+        this.showToast("error", "Erreur de validation", itemErrors.join(", "));
         return false;
       }
 
@@ -636,8 +767,12 @@ export default {
         const preparedData = this.prepareInvoiceData(values);
         this.$emit("save", preparedData);
       } catch (error) {
-        console.error("Form submission error:", error);
-        this.showToast("error", "Error", "An error occurred while saving the invoice");
+        console.error("Erreur de soumission du formulaire:", error);
+        this.showToast(
+          "error",
+          "Erreur",
+          "Une erreur s'est produite lors de la sauvegarde de la facture"
+        );
       } finally {
         this.loading = false;
       }

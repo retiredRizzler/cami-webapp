@@ -5,8 +5,8 @@
 
     <!-- Page Header - Optimisé mobile -->
     <div class="mb-4 sm:mb-6">
-      <h1 class="text-2xl sm:text-3xl font-bold text-primary mb-2">Customer Management</h1>
-      <p class="text-muted-color text-sm sm:text-base">Manage your students and corporate clients</p>
+      <h1 class="text-2xl sm:text-3xl font-bold text-primary mb-2">Gestion des Clients</h1>
+      <p class="text-muted-color text-sm sm:text-base">Gérez vos étudiants et clients entreprises</p>
     </div>
 
     <!-- Quick Stats - Cards responsives -->
@@ -20,19 +20,19 @@
       <div class="card-stat p-3 sm:p-4">
         <div class="text-left">
           <div class="text-xl sm:text-2xl font-bold text-blue-600">{{ individualCount }}</div>
-          <div class="text-xs sm:text-sm text-muted-color">Students</div>
+          <div class="text-xs sm:text-sm text-muted-color">Étudiants</div>
         </div>
       </div>
       <div class="card-stat p-3 sm:p-4">
         <div class="text-left">
           <div class="text-xl sm:text-2xl font-bold text-emerald-600">{{ companyCount }}</div>
-          <div class="text-xs sm:text-sm text-muted-color">Companies</div>
+          <div class="text-xs sm:text-sm text-muted-color">Entreprises</div>
         </div>
       </div>
       <div class="card-stat p-3 sm:p-4">
         <div class="text-left">
-          <div class="text-xl sm:text-2xl font-bold text-orange-600">€ {{ totalRevenue.toFixed(0) }}</div>
-          <div class="text-xs sm:text-sm text-muted-color">Revenue</div>
+          <div class="text-xl sm:text-2xl font-bold text-orange-600">€ {{ totalRevenue }}</div>
+          <div class="text-xs sm:text-sm text-muted-color">Revenus</div>
         </div>
       </div>
     </div>
@@ -44,7 +44,7 @@
         <div class="flex gap-2">
           <Button
             icon="pi pi-plus"
-            label="Add Customer"
+            label="Ajouter Client"
             @click="openCreateDialog"
             severity="primary"
             class="flex-1"
@@ -64,7 +64,7 @@
             <InputIcon class="pi pi-search" />
             <InputText
               v-model="globalFilter"
-              placeholder="Search customers..."
+              placeholder="Rechercher des clients..."
               @input="onGlobalFilter"
               fluid
               size="small"
@@ -74,7 +74,7 @@
         <!-- Mobile Filters -->
         <div class="flex gap-2">
           <Button
-            :label="showFilters ? 'Hide Filters' : 'Filters'"
+            :label="showFilters ? 'Masquer Filtres' : 'Filtres'"
             icon="pi pi-filter"
             @click="showFilters = !showFilters"
             severity="secondary"
@@ -83,7 +83,7 @@
             class="flex-1"
           />
           <Button
-            :label="viewMode === 'cards' ? 'Table' : 'Cards'"
+            :label="viewMode === 'cards' ? 'Tableau' : 'Cartes'"
             :icon="viewMode === 'cards' ? 'pi pi-table' : 'pi pi-th-large'"
             @click="toggleViewMode"
             severity="secondary"
@@ -98,13 +98,13 @@
         <div class="flex gap-2">
           <Button
             icon="pi pi-plus"
-            label="Add New Customer"
+            label="Ajouter Nouveau Client"
             @click="openCreateDialog"
             severity="primary"
           />
           <Button
             icon="pi pi-refresh"
-            label="Refresh"
+            label="Actualiser"
             @click="loadCustomers"
             severity="secondary"
             outlined
@@ -115,7 +115,7 @@
             <InputIcon class="pi pi-search" />
             <InputText
               v-model="globalFilter"
-              placeholder="Search customers..."
+              placeholder="Rechercher des clients..."
               @input="onGlobalFilter"
               class="w-64"
             />
@@ -125,7 +125,7 @@
             @click="toggleViewMode"
             severity="secondary"
             outlined
-            v-tooltip="viewMode === 'cards' ? 'Table View' : 'Card View'"
+            v-tooltip="viewMode === 'cards' ? 'Vue Tableau' : 'Vue Cartes'"
           />
         </div>
       </div>
@@ -135,13 +135,13 @@
     <div v-if="showFilters" class="sm:hidden mb-4 p-4 bg-surface-50 rounded-xl border border-surface-200">
       <div class="space-y-3">
         <div>
-          <label class="text-sm font-medium block mb-2">Client Type</label>
+          <label class="text-sm font-medium block mb-2">Type de Client</label>
           <Select
             v-model="typeFilter"
             :options="typeFilterOptions"
             optionLabel="label"
             optionValue="value"
-            placeholder="All Types"
+            placeholder="Tous Types"
             @change="onFilterChange"
             fluid
             size="small"
@@ -149,7 +149,7 @@
         </div>
         <div class="flex gap-2">
           <Button
-            label="Clear Filters"
+            label="Effacer Filtres"
             @click="clearFilters"
             severity="secondary"
             outlined
@@ -157,7 +157,7 @@
             class="flex-1"
           />
           <Button
-            label="Apply"
+            label="Appliquer"
             @click="showFilters = false"
             severity="primary"
             size="small"
@@ -194,7 +194,7 @@
                 <div class="font-semibold text-surface-900 truncate">{{ customer.display_name }}</div>
                 <div class="flex items-center gap-2 mt-1">
                   <Tag
-                    :value="customer.client_type === 'individual' ? 'Student' : 'Company'"
+                    :value="customer.client_type === 'individual' ? 'Étudiant' : 'Entreprise'"
                     :severity="customer.client_type === 'individual' ? 'secondary' : 'info'"
                     size="small"
                   />
@@ -254,22 +254,22 @@
           <div class="grid grid-cols-3 gap-4 pt-3 border-t border-surface-100">
             <div class="text-center">
               <div class="text-lg font-semibold text-primary">{{ customer.total_lessons || 0 }}</div>
-              <div class="text-xs text-muted-color">Lessons</div>
+              <div class="text-xs text-muted-color">Cours</div>
             </div>
             <div class="text-center">
               <div class="text-lg font-semibold text-emerald-600">{{ customer.total_invoices || 0 }}</div>
-              <div class="text-xs text-muted-color">Invoices</div>
+              <div class="text-xs text-muted-color">Factures</div>
             </div>
             <div class="text-center">
-              <div class="text-lg font-semibold text-orange-600">€{{ (customer.total_billed || 0).toFixed(0) }}</div>
-              <div class="text-xs text-muted-color">Revenue</div>
+              <div class="text-lg font-semibold text-orange-600">€{{ (customer.total_billed || 0).toFixed(2) }}</div>
+              <div class="text-xs text-muted-color">Revenus</div>
             </div>
           </div>
 
           <!-- Quick Actions -->
           <div class="flex gap-2 pt-3 border-t border-surface-100">
             <Button
-              label="Edit"
+              label="Modifier"
               icon="pi pi-pencil"
               @click="openEditDialog(customer)"
               severity="secondary"
@@ -278,7 +278,7 @@
               class="flex-1"
             />
             <Button
-              label="Invoice"
+              label="Facturer"
               icon="pi pi-receipt"
               @click="createInvoiceFor(customer)"
               severity="primary"
@@ -301,13 +301,13 @@
       <div v-if="filteredCustomers.length === 0" class="text-center py-12">
         <div class="max-w-sm mx-auto">
           <i class="pi pi-users text-6xl text-muted-color mb-4 block"></i>
-          <h3 class="text-lg font-medium mb-2">No customers found</h3>
+          <h3 class="text-lg font-medium mb-2">Aucun client trouvé</h3>
           <p class="text-muted-color mb-6 text-sm">
-            {{ globalFilter ? 'Try adjusting your search terms' : 'Start by adding your first customer' }}
+            {{ globalFilter ? 'Essayez d\'ajuster vos termes de recherche' : 'Commencez par ajouter votre premier client' }}
           </p>
           <Button
             icon="pi pi-plus"
-            label="Add Customer"
+            label="Ajouter Client"
             @click="openCreateDialog"
             class="w-full sm:w-auto"
           />
@@ -341,14 +341,14 @@
               <Button
                 text
                 icon="pi pi-plus"
-                label="Expand All"
+                label="Tout Développer"
                 @click="expandAll"
                 size="small"
               />
               <Button
                 text
                 icon="pi pi-minus"
-                label="Collapse All"
+                label="Tout Réduire"
                 @click="collapseAll"
                 size="small"
               />
@@ -363,14 +363,14 @@
         <Column field="client_type" header="Type" style="width: 8rem">
           <template #body="{ data }">
             <Tag
-              :value="data.client_type === 'individual' ? 'Student' : 'Company'"
+              :value="data.client_type === 'individual' ? 'Étudiant' : 'Entreprise'"
               :severity="data.client_type === 'individual' ? 'secondary' : 'info'"
             />
           </template>
         </Column>
 
         <!-- Name -->
-        <Column field="display_name" header="Name" sortable>
+        <Column field="display_name" header="Nom" sortable>
           <template #body="{ data }">
             <div class="flex items-center gap-2">
               <Avatar
@@ -385,7 +385,7 @@
                   Contact: {{ data.contact_person }}
                 </div>
                 <div v-if="data.client_type === 'individual' && data.license_type" class="text-sm text-muted-color">
-                  License: {{ data.license_type }}
+                  Permis: {{ data.license_type }}
                 </div>
               </div>
             </div>
@@ -409,7 +409,7 @@
         </Column>
 
         <!-- Location -->
-        <Column header="Location">
+        <Column header="Localisation">
           <template #body="{ data }">
             <div v-if="data.city || data.country" class="text-sm">
               <div>{{ data.city }}</div>
@@ -419,23 +419,23 @@
         </Column>
 
         <!-- Stats -->
-        <Column header="Activity" sortable sortField="total_lessons">
+        <Column header="Activité" sortable sortField="total_lessons">
           <template #body="{ data }">
             <div class="text-sm">
               <div class="flex items-center gap-1">
                 <i class="pi pi-calendar text-xs"></i>
-                <span>{{ data.total_lessons || 0 }} lessons</span>
+                <span>{{ data.total_lessons || 0 }} cours</span>
               </div>
               <div class="flex items-center gap-1 mt-1">
                 <i class="pi pi-receipt text-xs"></i>
-                <span>{{ data.total_invoices || 0 }} invoices</span>
+                <span>{{ data.total_invoices || 0 }} factures</span>
               </div>
             </div>
           </template>
         </Column>
 
         <!-- Revenue -->
-        <Column header="Revenue" sortable sortField="total_billed">
+        <Column header="Revenus" sortable sortField="total_billed">
           <template #body="{ data }">
             <div class="font-medium">
               €{{ (data.total_billed || 0).toFixed(2) }}
@@ -453,7 +453,7 @@
                 severity="secondary"
                 text
                 @click="openEditDialog(data)"
-                v-tooltip.top="'Edit'"
+                v-tooltip.top="'Modifier'"
               />
               <Button
                 icon="pi pi-trash"
@@ -461,7 +461,7 @@
                 severity="danger"
                 text
                 @click="confirmDelete(data)"
-                v-tooltip.top="'Delete'"
+                v-tooltip.top="'Supprimer'"
               />
             </div>
           </template>
@@ -470,25 +470,25 @@
         <!-- Row Expansion Template -->
         <template #expansion="{ data }">
           <div class="p-4 bg-surface-50">
-            <h5 class="mb-4 font-semibold">Customer Details</h5>
+            <h5 class="mb-4 font-semibold">Détails du Client</h5>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <!-- Personal/Company Info -->
               <div>
                 <h6 class="font-medium mb-3 text-primary">
-                  {{ data.client_type === 'company' ? 'Company Information' : 'Personal Information' }}
+                  {{ data.client_type === 'company' ? 'Informations Entreprise' : 'Informations Personnelles' }}
                 </h6>
                 <div class="space-y-2 text-sm">
                   <div v-if="data.vat_number" class="flex justify-between">
-                    <span class="text-muted-color">VAT Number:</span>
+                    <span class="text-muted-color">Numéro TVA:</span>
                     <span>{{ data.vat_number }}</span>
                   </div>
                   <div v-if="data.address" class="flex justify-between">
-                    <span class="text-muted-color">Address:</span>
+                    <span class="text-muted-color">Adresse:</span>
                     <span class="text-right max-w-xs">{{ data.address }}</span>
                   </div>
                   <div v-if="data.postal_code" class="flex justify-between">
-                    <span class="text-muted-color">Postal Code:</span>
+                    <span class="text-muted-color">Code Postal:</span>
                     <span>{{ data.postal_code }}</span>
                   </div>
                   <div v-if="data.notes" class="flex justify-between">
@@ -496,7 +496,7 @@
                     <span class="text-right max-w-xs">{{ data.notes }}</span>
                   </div>
                   <div class="flex justify-between">
-                    <span class="text-muted-color">Created:</span>
+                    <span class="text-muted-color">Créé le:</span>
                     <span>{{ formatDate(data.created_at) }}</span>
                   </div>
                 </div>
@@ -504,11 +504,11 @@
 
               <!-- Recent Activity -->
               <div>
-                <h6 class="font-medium mb-3 text-primary">Recent Activity</h6>
+                <h6 class="font-medium mb-3 text-primary">Activité Récente</h6>
                 <div class="space-y-3">
                   <!-- Recent Invoices -->
                   <div v-if="data.invoices && data.invoices.length > 0">
-                    <div class="text-sm font-medium mb-2">Recent Invoices</div>
+                    <div class="text-sm font-medium mb-2">Factures Récentes</div>
                     <div class="space-y-1">
                       <div
                         v-for="invoice in data.invoices.slice(0, 3)"
@@ -530,7 +530,7 @@
 
                   <!-- Recent Lessons -->
                   <div v-if="data.lessons && data.lessons.length > 0">
-                    <div class="text-sm font-medium mb-2">Recent Lessons</div>
+                    <div class="text-sm font-medium mb-2">Cours Récents</div>
                     <div class="space-y-1">
                       <div
                         v-for="lesson in data.lessons.slice(0, 3)"
@@ -552,7 +552,7 @@
 
                   <!-- No Activity -->
                   <div v-if="(!data.invoices || data.invoices.length === 0) && (!data.lessons || data.lessons.length === 0)">
-                    <p class="text-muted-color text-sm">No recent activity</p>
+                    <p class="text-muted-color text-sm">Aucune activité récente</p>
                   </div>
                 </div>
               </div>
@@ -564,11 +564,11 @@
         <template #empty>
           <div class="text-center py-8">
             <i class="pi pi-users text-4xl text-muted-color mb-4"></i>
-            <h3 class="text-lg font-medium mb-2">No customers yet</h3>
-            <p class="text-muted-color mb-4">Start by adding your first customer</p>
+            <h3 class="text-lg font-medium mb-2">Aucun client pour le moment</h3>
+            <p class="text-muted-color mb-4">Commencez par ajouter votre premier client</p>
             <Button
               icon="pi pi-plus"
-              label="Add Customer"
+              label="Ajouter Client"
               @click="openCreateDialog"
             />
           </div>
@@ -579,7 +579,7 @@
     <!-- Customer Form Dialog -->
     <Dialog
       v-model:visible="showDialog"
-      :header="isEditing ? 'Edit Customer' : 'Add New Customer'"
+      :header="isEditing ? 'Modifier Client' : 'Ajouter Nouveau Client'"
       modal
       :class="isMobile ? 'w-full h-full m-0' : 'w-full max-w-2xl'"
       :style="isMobile ? 'height: 100vh; max-height: 100vh' : ''"
@@ -600,7 +600,7 @@
     <!-- Customer Details Modal (Mobile) -->
     <Dialog
       v-model:visible="showDetailsDialog"
-      header="Customer Details"
+      header="Détails du Client"
       modal
       :class="isMobile ? 'w-full h-full m-0' : 'w-full max-w-2xl'"
       :style="isMobile ? 'height: 100vh; max-height: 100vh' : ''"
@@ -618,7 +618,7 @@
           />
           <h3 class="text-xl font-semibold">{{ selectedCustomer.display_name }}</h3>
           <Tag
-            :value="selectedCustomer.client_type === 'individual' ? 'Student' : 'Company'"
+            :value="selectedCustomer.client_type === 'individual' ? 'Étudiant' : 'Entreprise'"
             :severity="selectedCustomer.client_type === 'individual' ? 'secondary' : 'info'"
             class="mt-2"
           />
@@ -626,7 +626,7 @@
 
         <!-- Contact Information -->
         <div class="space-y-4">
-          <h4 class="font-medium text-primary">Contact Information</h4>
+          <h4 class="font-medium text-primary">Informations de Contact</h4>
           <div class="space-y-3">
             <div class="flex items-center gap-3">
               <i class="pi pi-envelope text-muted-color w-5"></i>
@@ -650,19 +650,19 @@
 
         <!-- Statistics -->
         <div class="space-y-4">
-          <h4 class="font-medium text-primary">Statistics</h4>
+          <h4 class="font-medium text-primary">Statistiques</h4>
           <div class="grid grid-cols-3 gap-4">
             <div class="text-center p-4 bg-surface-50 rounded-lg">
               <div class="text-2xl font-bold text-primary">{{ selectedCustomer.total_lessons || 0 }}</div>
-              <div class="text-sm text-muted-color">Lessons</div>
+              <div class="text-sm text-muted-color">Cours</div>
             </div>
             <div class="text-center p-4 bg-surface-50 rounded-lg">
               <div class="text-2xl font-bold text-emerald-600">{{ selectedCustomer.total_invoices || 0 }}</div>
-              <div class="text-sm text-muted-color">Invoices</div>
+              <div class="text-sm text-muted-color">Factures</div>
             </div>
             <div class="text-center p-4 bg-surface-50 rounded-lg">
               <div class="text-2xl font-bold text-orange-600">€{{ (selectedCustomer.total_billed || 0).toFixed(0) }}</div>
-              <div class="text-sm text-muted-color">Revenue</div>
+              <div class="text-sm text-muted-color">Revenus</div>
             </div>
           </div>
         </div>
@@ -670,14 +670,14 @@
         <!-- Actions -->
         <div class="flex gap-3">
           <Button
-            label="Edit Customer"
+            label="Modifier Client"
             icon="pi pi-pencil"
             @click="editFromDetails"
             severity="primary"
             class="flex-1"
           />
           <Button
-            label="Create Invoice"
+            label="Créer Facture"
             icon="pi pi-receipt"
             @click="createInvoiceFromDetails"
             severity="secondary"
@@ -691,7 +691,7 @@
     <OverlayPanel ref="customerActionsPanel" class="w-48">
       <div class="space-y-2" v-if="selectedCustomer">
         <Button
-          label="View Details"
+          label="Voir Détails"
           icon="pi pi-eye"
           @click="showCustomerDetails(selectedCustomer)"
           variant="text"
@@ -699,7 +699,7 @@
           size="small"
         />
         <Button
-          label="Edit Customer"
+          label="Modifier Client"
           icon="pi pi-pencil"
           @click="openEditDialog(selectedCustomer)"
           variant="text"
@@ -707,7 +707,7 @@
           size="small"
         />
         <Button
-          label="Create Invoice"
+          label="Créer Facture"
           icon="pi pi-receipt"
           @click="createInvoiceFor(selectedCustomer)"
           variant="text"
@@ -716,7 +716,7 @@
         />
         <Divider />
         <Button
-          label="Call Customer"
+          label="Appeler Client"
           icon="pi pi-phone"
           @click="callCustomer(selectedCustomer.phone)"
           variant="text"
@@ -725,7 +725,7 @@
           :disabled="!selectedCustomer.phone"
         />
         <Button
-          label="Send Email"
+          label="Envoyer Email"
           icon="pi pi-envelope"
           @click="openEmail(selectedCustomer.email)"
           variant="text"
@@ -734,7 +734,7 @@
         />
         <Divider />
         <Button
-          label="Delete Customer"
+          label="Supprimer Client"
           icon="pi pi-trash"
           @click="confirmDelete(selectedCustomer)"
           variant="text"
@@ -779,9 +779,9 @@ export default {
 
       // Filter options
       typeFilterOptions: [
-        { label: "All Types", value: null },
-        { label: "Students", value: "individual" },
-        { label: "Companies", value: "company" }
+        { label: "Tous Types", value: null },
+        { label: "Étudiants", value: "individual" },
+        { label: "Entreprises", value: "company" }
       ],
 
       // Service instance
@@ -834,8 +834,8 @@ export default {
         console.error('Error loading customers:', error)
         this.$toast.add({
           severity: 'error',
-          summary: 'Error',
-          detail: 'Failed to load customers',
+          summary: 'Erreur',
+          detail: 'Échec du chargement des clients',
           life: 5000
         })
       } finally {
@@ -934,16 +934,16 @@ export default {
           await this.customersService.updateCustomer(this.selectedCustomer.id, customerData)
           this.$toast.add({
             severity: 'success',
-            summary: 'Success',
-            detail: 'Customer updated successfully',
+            summary: 'Succès',
+            detail: 'Client modifié avec succès',
             life: 3000
           })
         } else {
           await this.customersService.createCustomer(customerData)
           this.$toast.add({
             severity: 'success',
-            summary: 'Success',
-            detail: 'Customer created successfully',
+            summary: 'Succès',
+            detail: 'Client créé avec succès',
             life: 3000
           })
         }
@@ -954,8 +954,8 @@ export default {
         console.error('Error saving customer:', error)
         this.$toast.add({
           severity: 'error',
-          summary: 'Error',
-          detail: this.isEditing ? 'Failed to update customer' : 'Failed to create customer',
+          summary: 'Erreur',
+          detail: this.isEditing ? 'Échec de la modification du client' : 'Échec de la création du client',
           life: 5000
         })
       }
@@ -964,16 +964,16 @@ export default {
     confirmDelete(customer) {
       this.hideAllPanels()
       this.$confirm.require({
-        message: `Are you sure you want to delete ${customer.display_name}? This action cannot be undone and will permanently remove all associated data.`,
-        header: 'Delete Customer',
+        message: `Êtes-vous sûr de vouloir supprimer ${customer.display_name} ? Cette action ne peut pas être annulée et supprimera définitivement toutes les données associées.`,
+        header: 'Supprimer Client',
         icon: 'pi pi-exclamation-triangle',
         rejectProps: {
-          label: 'Cancel',
+          label: 'Annuler',
           severity: 'secondary',
           outlined: true
         },
         acceptProps: {
-          label: 'Delete',
+          label: 'Supprimer',
           severity: 'danger'
         },
         accept: () => {
@@ -987,8 +987,8 @@ export default {
         await this.customersService.deleteCustomer(customerId)
         this.$toast.add({
           severity: 'success',
-          summary: 'Customer Deleted',
-          detail: `${customerName} has been successfully deleted`,
+          summary: 'Client Supprimé',
+          detail: `${customerName} a été supprimé avec succès`,
           life: 3000
         })
         await this.loadCustomers()
@@ -996,8 +996,8 @@ export default {
         console.error('Error deleting customer:', error)
         this.$toast.add({
           severity: 'error',
-          summary: 'Delete Failed',
-          detail: 'Failed to delete customer. Please try again.',
+          summary: 'Échec de la Suppression',
+          detail: 'Échec de la suppression du client. Veuillez réessayer.',
           life: 5000
         })
       }
@@ -1009,8 +1009,8 @@ export default {
         window.open(`tel:${phone}`, '_self')
         this.$toast.add({
           severity: 'info',
-          summary: 'Calling',
-          detail: `Calling ${phone}...`,
+          summary: 'Appel',
+          detail: `Appel en cours vers ${phone}...`,
           life: 2000
         })
       }
@@ -1023,7 +1023,7 @@ export default {
         this.$toast.add({
           severity: 'info',
           summary: 'Email',
-          detail: `Opening email to ${email}...`,
+          detail: `Ouverture de l'email vers ${email}...`,
           life: 2000
         })
       }
@@ -1105,7 +1105,7 @@ export default {
     formatDate(dateString) {
       if (!dateString) return ''
       const date = new Date(dateString)
-      return date.toLocaleDateString('en-GB', {
+      return date.toLocaleDateString('fr-FR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'

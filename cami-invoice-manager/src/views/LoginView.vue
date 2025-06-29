@@ -7,8 +7,8 @@
     <div class="w-full max-w-md">
       <!-- Header Section -->
       <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold mb-2">Welcome Back</h1>
-        <p>Sign in to your driving school account</p>
+        <h1 class="text-3xl font-bold mb-2">Bienvenue sur CamInvoice</h1>
+        <p>Pour l'instant la connexion directe par email et mot de passe est désactivée. Connectez-vous via Google svp.</p>
       </div>
 
       <!-- Login Card -->
@@ -39,7 +39,7 @@
               d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
             />
           </svg>
-          Continue with Google
+          Continuez avec Google
         </Button>
 
         <!-- Divider -->
@@ -87,7 +87,7 @@
                 toggleMask
                 autocomplete="current-password"
               />
-              <label for="password">Password</label>
+              <label for="password">Mot de passe</label>
             </FloatLabel>
             <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
               {{ $form.password.error?.message }}
@@ -98,10 +98,10 @@
           <div class="flex justify-between items-center">
             <div class="flex items-center gap-2">
               <Checkbox id="remember" v-model="rememberMe" binary />
-              <label for="remember" class="text-sm"> Remember me </label>
+              <label for="remember" class="text-sm"> Se souvenir de moi </label>
             </div>
             <Button link size="small" class="p-0 text-sm" @click="showForgotPassword">
-              Forgot password?
+              Mot de passe oublié?
             </Button>
           </div>
 
@@ -112,15 +112,15 @@
         <!-- Sign Up Link -->
         <div class="text-center mt-6 pt-6 border-t">
           <p class="text-sm">
-            Don't have an account?
-            <Button link class="p-0 text-sm font-medium" @click="goToSignUp"> Sign up here </Button>
+            Pas encore de compte?
+            <Button link class="p-0 text-sm font-medium" @click="goToSignUp"> Créez un nouveau compte </Button>
           </p>
         </div>
       </div>
 
       <!-- Footer -->
       <div class="text-center mt-8">
-        <p class="text-xs">By signing in, you agree to our Terms of Service and Privacy Policy</p>
+        <p class="text-xs"></p>
       </div>
     </div>
   </div>

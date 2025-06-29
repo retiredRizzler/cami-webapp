@@ -2,7 +2,7 @@
   <Card>
     <template #header>
       <div class="flex items-center justify-between p-6 pb-0">
-        <h3 class="text-lg font-semibold text-primary">Banking Information</h3>
+        <h3 class="text-lg font-semibold text-primary">Informations Bancaires</h3>
         <div class="flex items-center gap-2">
           <i class="pi pi-credit-card text-primary"></i>
           <Button
@@ -12,7 +12,7 @@
             severity="secondary"
             text
             @click="startEditing"
-            v-tooltip.top="'Edit banking information'"
+            v-tooltip.top="'Modifier les informations bancaires'"
           />
         </div>
       </div>
@@ -21,15 +21,15 @@
       <!-- Display Mode -->
       <div v-if="!isEditing" class="space-y-4">
         <div v-if="profile?.bank_name" class="flex justify-between">
-          <span class="text-muted-color font-medium">Bank Name:</span>
+          <span class="text-muted-color font-medium">Nom de la Banque :</span>
           <span>{{ profile.bank_name }}</span>
         </div>
         <div v-if="profile?.iban" class="flex justify-between">
-          <span class="text-muted-color font-medium">IBAN:</span>
+          <span class="text-muted-color font-medium">IBAN :</span>
           <span class="font-mono text-sm">{{ formatIBAN(profile.iban) }}</span>
         </div>
         <div v-if="profile?.bic" class="flex justify-between">
-          <span class="text-muted-color font-medium">BIC/SWIFT:</span>
+          <span class="text-muted-color font-medium">BIC/SWIFT :</span>
           <span class="font-mono">{{ profile.bic }}</span>
         </div>
 
@@ -37,16 +37,16 @@
         <div v-if="hasBankingInfo" class="pt-3 border-t">
           <div class="flex items-center gap-2">
             <i class="pi pi-check-circle text-green-600"></i>
-            <span class="text-sm text-green-600 font-medium">Banking information complete</span>
+            <span class="text-sm text-green-600 font-medium">Informations bancaires complètes</span>
           </div>
         </div>
 
         <!-- Empty state -->
         <div v-if="!hasBankingInfo" class="text-center py-6 text-muted-color">
           <i class="pi pi-credit-card text-2xl mb-2 block"></i>
-          <p class="mb-3">No banking information configured</p>
+          <p class="mb-3">Aucune information bancaire configurée</p>
           <Button
-            label="Add Banking Info"
+            label="Ajouter Info Bancaire"
             icon="pi pi-plus"
             size="small"
             @click="startEditing"
@@ -57,7 +57,7 @@
                 <i class="pi pi-info-circle"></i>
               </template>
               <div class="text-sm">
-                Add your banking details to include payment information on invoices
+                Ajoutez vos coordonnées bancaires pour inclure les informations de paiement sur les factures
               </div>
             </Message>
           </div>
@@ -82,7 +82,7 @@
                 fluid
                 :invalid="$form.bank_name?.invalid"
               />
-              <label for="bank_name">Bank Name</label>
+              <label for="bank_name">Nom de la Banque</label>
             </FloatLabel>
             <Message v-if="$form.bank_name?.invalid" severity="error" size="small">
               {{ $form.bank_name.error?.message }}
@@ -105,7 +105,7 @@
             <Message v-if="$form.iban?.invalid" severity="error" size="small">
               {{ $form.iban.error?.message }}
             </Message>
-            <small class="text-muted-color">International Bank Account Number</small>
+            <small class="text-muted-color">Numéro de Compte Bancaire International</small>
           </div>
 
           <!-- BIC -->
@@ -119,12 +119,12 @@
                 :invalid="$form.bic?.invalid"
                 class="font-mono"
               />
-              <label for="bic">BIC/SWIFT Code</label>
+              <label for="bic">Code BIC/SWIFT</label>
             </FloatLabel>
             <Message v-if="$form.bic?.invalid" severity="error" size="small">
               {{ $form.bic.error?.message }}
             </Message>
-            <small class="text-muted-color">Bank Identifier Code</small>
+            <small class="text-muted-color">Code d'Identification de la Banque</small>
           </div>
 
           <!-- Info Message -->
@@ -133,8 +133,8 @@
               <i class="pi pi-info-circle"></i>
             </template>
             <div class="text-sm">
-              <strong>Banking Information:</strong> This information will appear on your invoices
-              for payment processing. All fields are optional but recommended for professional invoicing.
+              <strong>Informations Bancaires :</strong> Ces informations apparaîtront sur vos factures
+              pour le traitement des paiements. Tous les champs sont optionnels mais recommandés pour une facturation professionnelle.
             </div>
           </Message>
 
@@ -142,14 +142,14 @@
           <div class="flex justify-end gap-2 pt-4 border-t">
             <Button
               type="button"
-              label="Cancel"
+              label="Annuler"
               severity="secondary"
               outlined
               @click="cancelEditing"
             />
             <Button
               type="submit"
-              label="Save Changes"
+              label="Enregistrer"
               :loading="saving"
               icon="pi pi-check"
             />
@@ -198,13 +198,13 @@ export default {
             if (!val || val.trim() === '') return true
             const ibanRegex = /^[A-Z]{2}[0-9]{2}[A-Z0-9]{4}[0-9]{7}([A-Z0-9]?){0,16}$/
             return ibanRegex.test(val.replace(/\s/g, '').toUpperCase())
-          }, { message: 'Please enter a valid IBAN' }),
+          }, { message: 'Veuillez entrer un IBAN valide' }),
 
           bic: z.string().optional().refine((val) => {
             if (!val || val.trim() === '') return true
             const bicRegex = /^[A-Z]{6}[A-Z0-9]{2}([A-Z0-9]{3})?$/
             return bicRegex.test(val.replace(/\s/g, '').toUpperCase())
-          }, { message: 'Please enter a valid BIC/SWIFT code' }),
+          }, { message: 'Veuillez entrer un code BIC/SWIFT valide' }),
         })
       );
     },

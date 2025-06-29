@@ -14,7 +14,7 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      redirect: "/dashboard",
+      redirect: "/customers",
       meta: {
         title: "Home"
       }
@@ -64,7 +64,7 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} - CamInvoice` : 'CAMI'
+  document.title = to.meta.title ? `${to.meta.title} - CamInvoice` : 'CamInvoice'
 
   const authStore = useAuthStore();
 
