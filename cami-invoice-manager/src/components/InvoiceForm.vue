@@ -105,20 +105,20 @@
         </div>
       </div>
 
-      <!-- Section des articles de facture -->
+      <!-- Section des services de facture -->
       <div>
         <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">Articles de la facture</h3>
+          <h3 class="text-lg font-semibold">Services de la facture</h3>
           <Button
             type="button"
             icon="pi pi-plus"
-            label="Ajouter un article"
+            label="Ajouter un service"
             size="small"
             @click="addItem"
           />
         </div>
 
-        <!-- Liste des articles -->
+        <!-- Liste des services -->
         <div v-if="invoiceItems.length > 0" class="space-y-4">
           <div
             v-for="(item, index) in invoiceItems"
@@ -192,7 +192,7 @@
               </div>
             </div>
 
-            <!-- Détails de l'article -->
+            <!-- Détails de le service -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
               <div class="md:col-span-2">
                 <FloatLabel variant="on">
@@ -275,7 +275,7 @@
                   severity="danger"
                   text
                   @click="removeItem(index)"
-                  v-tooltip.top="'Supprimer l\'article'"
+                  v-tooltip.top="'Supprimer le service'"
                 />
               </div>
             </div>
@@ -286,7 +286,7 @@
         <div v-else class="text-center py-8 border-2 border-dashed border-surface-300 rounded">
           <i class="pi pi-plus text-2xl text-muted-color mb-2"></i>
           <p class="text-muted-color">
-            Aucun article ajouté. Cliquez sur "Ajouter un article" pour commencer.
+            Aucun service ajouté. Cliquez sur "Ajouter un service" pour commencer.
           </p>
         </div>
       </div>
@@ -608,7 +608,7 @@ export default {
     },
 
     /**
-     * Gestion du changement de date de service pour un article
+     * Gestion du changement de date de service pour un service
      */
     onServiceDateChange(index, newDate) {
       this.invoiceItems[index].service_date = this.convertToLocalDate(newDate);
@@ -730,20 +730,20 @@ export default {
 
     validateItems() {
       if (this.invoiceItems.length === 0) {
-        this.showToast("warn", "Attention", "Veuillez ajouter au moins un article à la facture");
+        this.showToast("warn", "Attention", "Veuillez ajouter au moins un service à la facture");
         return false;
       }
 
       const itemErrors = [];
       this.invoiceItems.forEach((item, index) => {
         if (!item.description || item.description.trim() === "") {
-          itemErrors.push(`Article ${index + 1} : La description est obligatoire`);
+          itemErrors.push(`Service ${index + 1} : La description est obligatoire`);
         }
         if (!item.unit_price || item.unit_price <= 0) {
-          itemErrors.push(`Article ${index + 1} : Un prix unitaire valide est obligatoire`);
+          itemErrors.push(`Service ${index + 1} : Un prix unitaire valide est obligatoire`);
         }
         if (!item.quantity || item.quantity <= 0) {
-          itemErrors.push(`Article ${index + 1} : Une quantité valide est obligatoire`);
+          itemErrors.push(`Service ${index + 1} : Une quantité valide est obligatoire`);
         }
       });
 
