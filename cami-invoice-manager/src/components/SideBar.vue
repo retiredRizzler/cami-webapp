@@ -83,7 +83,7 @@
             <div class="space-y-1 sm:space-y-2">
               <!-- Dashboard -->
               <div
-                @click="navigateTo('dashboard')"
+                @click="navigateTo('lessons')"
                 class="nav-item"
                 :class="{ 'nav-item-active': isActiveRoute('dashboard') }"
                 role="button"
@@ -96,6 +96,8 @@
                   <span class="font-medium text-sm sm:text-base">Tableau de bord</span>
                   <div class="text-xs text-surface-500 mt-0.5 hidden sm:block">Vue d'ensemble</div>
                 </div>
+                <Tag value="Bientôt" severity="info" class="text-xs hidden sm:inline-flex" />
+                <div class="w-2 h-2 bg-info-500 rounded-full sm:hidden"></div>
               </div>
 
               <!-- Customers -->
