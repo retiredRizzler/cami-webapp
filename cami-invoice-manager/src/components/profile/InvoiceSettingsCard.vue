@@ -72,6 +72,7 @@
                 :min="0"
                 :max="100"
                 suffix="%"
+                showButtons
                 fluid
                 :invalid="$form.default_tax_rate?.invalid"
               />
