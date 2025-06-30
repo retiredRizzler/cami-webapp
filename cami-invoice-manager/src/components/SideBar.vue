@@ -83,21 +83,19 @@
             <div class="space-y-1 sm:space-y-2">
               <!-- Dashboard -->
               <div
-                @click="navigateTo('lessons')"
+                @click="navigateTo('home')"
                 class="nav-item"
-                :class="{ 'nav-item-active': isActiveRoute('dashboard') }"
+                :class="{ 'nav-item-active': isActiveRoute('welcome') }"
                 role="button"
                 tabindex="0"
-                @keypress.enter="navigateTo('dashboard')"
+                @keypress.enter="navigateTo('welcome')"
                 v-ripple
               >
                 <i class="pi pi-home text-lg"></i>
                 <div class="flex-1 min-w-0">
-                  <span class="font-medium text-sm sm:text-base">Tableau de bord</span>
-                  <div class="text-xs text-surface-500 mt-0.5 hidden sm:block">Vue d'ensemble</div>
+                  <span class="font-medium text-sm sm:text-base">Accueil</span>
+                  <div class="text-xs text-surface-500 mt-0.5 hidden sm:block">Page d'accueil</div>
                 </div>
-                <Tag value="Bientôt" severity="info" class="text-xs hidden sm:inline-flex" />
-                <div class="w-2 h-2 bg-info-500 rounded-full sm:hidden"></div>
               </div>
 
               <!-- Customers -->

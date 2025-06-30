@@ -7,6 +7,7 @@ import Dashboard from "@/views/Dashboard.vue";
 import CustomersView from "@/views/CustomersView.vue";
 import InvoicesView from "@/views/InvoicesView.vue";
 import ProfileView from "@/views/ProfileView.vue";
+import WelcomeView from "@/views/WelcomeView.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -14,9 +15,10 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      redirect: "/customers",
+      component: WelcomeView,
       meta: {
-        title: "Home"
+        requiresAuth: true,
+        title: "Accueil"
       }
     },
     {

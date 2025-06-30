@@ -8,7 +8,7 @@
       <!-- Header Section -->
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold mb-2">Bienvenue sur CamInvoice</h1>
-        <p>Pour l'instant la connexion directe par email et mot de passe est désactivée. Connectez-vous via Google svp.</p>
+        <p>Pour l'instant la connexion directe par email et mot de  <br> passe est désactivée. Connectez-vous via Google svp.</p>
       </div>
 
       <!-- Login Card -->
@@ -18,7 +18,6 @@
           @click="loginWithGoogle"
           :loading="googleLoading"
           class="w-full mb-6 flex items-center justify-center gap-2"
-          severity="secondary"
           outlined
         >
           <svg class="w-5 h-5" viewBox="0 0 24 24">
@@ -106,7 +105,7 @@
           </div>
 
           <!-- Submit Button -->
-          <Button type="submit" :loading="loginLoading" class="w-full" label="Sign In" />
+          <Button type="submit" :loading="loginLoading" class="w-full" label="Se Connecter" />
         </Form>
 
         <!-- Sign Up Link -->

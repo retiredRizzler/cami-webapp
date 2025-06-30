@@ -261,17 +261,24 @@ const Corporate = definePreset(Aura, {
 
 app.use(createPinia())
 app.use(router)
+app.use(ToastService);
 app.use(PrimeVue, {
     theme: {
         preset: Corporate,
         options: {
             darkModeSelector: 'none', // Changed to class-based selector
         }
+    },
+    toast: {
+        position: 'top-center', // Position par défaut
+        breakpoints: {
+            '768px': 'top-center', // Mobile
+            '1024px': 'top-right'  // Desktop
+        }
     }
 });
 
-// Add Toast service
-app.use(ToastService);
+
 app.use(ConfirmationService)
 app.directive('ripple', Ripple);
 

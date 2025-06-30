@@ -95,7 +95,6 @@
               <InputText
                 id="iban"
                 name="iban"
-                placeholder="BE68 5390 0754 7034"
                 fluid
                 :invalid="$form.iban?.invalid"
                 class="font-mono"
@@ -114,7 +113,6 @@
               <InputText
                 id="bic"
                 name="bic"
-                placeholder="KREDBEBB"
                 fluid
                 :invalid="$form.bic?.invalid"
                 class="font-mono"

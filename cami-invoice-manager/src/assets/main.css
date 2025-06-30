@@ -1,3 +1,170 @@
 @import "tailwindcss";
 @import "tailwindcss-primeui";
 @import "primeicons/primeicons.css";
+
+/* Ajoutez ces styles dans votre fichier src/assets/main.css */
+
+/* =================================
+   TOAST MOBILE OPTIMIZATIONS
+   ================================= */
+
+/* Positionnement des toasts sur mobile */
+@media (max-width: 768px) {
+  /* Container principal des toasts */
+  .p-toast {
+    top: 20px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    width: calc(100vw - 2rem) !important;
+    max-width: 400px !important;
+    z-index: 9999 !important;
+  }
+
+  /* Messages individuels des toasts */
+  .p-toast .p-toast-message {
+    margin: 0 0 0.5rem 0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  /* Contenu du toast */
+  .p-toast .p-toast-message-content {
+    padding: 1rem 1.25rem !important;
+    border-radius: 12px !important;
+  }
+
+  /* Icône du toast */
+  .p-toast .p-toast-message-icon {
+    font-size: 1.25rem !important;
+    margin-right: 0.75rem !important;
+  }
+
+  /* Texte du toast */
+  .p-toast .p-toast-message-text {
+    margin-left: 0.75rem !important;
+  }
+
+  /* Titre du toast */
+  .p-toast .p-toast-summary {
+    font-weight: 600 !important;
+    font-size: 0.9rem !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  /* Description du toast */
+  .p-toast .p-toast-detail {
+    font-size: 0.85rem !important;
+    line-height: 1.4 !important;
+    opacity: 0.9 !important;
+  }
+
+  /* Bouton de fermeture */
+  .p-toast .p-toast-icon-close {
+    width: 2rem !important;
+    height: 2rem !important;
+    border-radius: 6px !important;
+    margin-left: 0.5rem !important;
+  }
+}
+
+/* Toasts sur les très petits écrans */
+@media (max-width: 480px) {
+  .p-toast {
+    width: calc(100vw - 1rem) !important;
+    max-width: none !important;
+  }
+
+  .p-toast .p-toast-message-content {
+    padding: 0.875rem 1rem !important;
+  }
+
+  .p-toast .p-toast-summary {
+    font-size: 0.85rem !important;
+  }
+
+  .p-toast .p-toast-detail {
+    font-size: 0.8rem !important;
+  }
+}
+
+/* =================================
+   TOAST DESKTOP OPTIMIZATIONS
+   ================================= */
+
+/* Sur desktop, gardons le comportement par défaut mais améliorons l'apparence */
+@media (min-width: 769px) {
+  .p-toast {
+    top: 20px !important;
+    right: 20px !important;
+    left: auto !important;
+    width: 400px !important;
+    max-width: 400px !important;
+  }
+
+  .p-toast .p-toast-message {
+    border-radius: 12px !important;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+    backdrop-filter: blur(8px) !important;
+  }
+
+  .p-toast .p-toast-message-content {
+    border-radius: 12px !important;
+  }
+}
+
+
+
+/* =================================
+   ANIMATIONS AMÉLIORÉES
+   ================================= */
+
+/* Animation d'entrée */
+.p-toast .p-toast-message {
+  animation: toastSlideIn 0.3s ease-out !important;
+}
+
+@keyframes toastSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Animation de sortie */
+.p-toast .p-toast-message.p-toast-message-leave {
+  animation: toastSlideOut 0.3s ease-in forwards !important;
+}
+
+@keyframes toastSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-100%) scale(0.95);
+  }
+}
+
+/* =================================
+   ACCESSIBILITÉ
+   ================================= */
+
+/* Focus states pour l'accessibilité */
+.p-toast .p-toast-icon-close:focus {
+  outline: 2px solid var(--p-primary-color) !important;
+  outline-offset: 2px !important;
+}
+
+/* Réduction des mouvements pour les utilisateurs sensibles */
+@media (prefers-reduced-motion: reduce) {
+  .p-toast .p-toast-message {
+    animation: none !important;
+  }
+}

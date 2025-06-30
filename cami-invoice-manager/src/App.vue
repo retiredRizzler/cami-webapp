@@ -13,7 +13,7 @@
     </div>
 
     <!-- Sidebar -->
-    <SideBar />
+    <SideBar v-if="authStore.user"/>
 
     <!-- Main Content Area -->
     <div class="main-content" :class="{ 'blur-sm': isInitializing }">
@@ -50,7 +50,7 @@
                 @click="toggleQuickActions"
                 variant="text"
                 rounded
-                size="small"
+                size="medium"
                 class="w-8 h-8 sm:w-9 sm:h-9"
                 v-tooltip.bottom="'Actions rapides'"
               />
@@ -341,6 +341,7 @@ export default {
     ...mapStores(useAuthStore),
     currentPageTitle() {
       const titles = {
+        home: 'Accueil',
         dashboard: "Tableau de bord",
         customers: "Gestion des clients",
         invoices: "Facturation",
@@ -349,10 +350,11 @@ export default {
         profile: "Mon Profil",
         settings: "Paramètres",
       };
-      return titles[this.$route.name] || "Driving School Pro";
+      return titles[this.$route.name] || "CamInvoice";
     },
     currentPageDescription() {
       const descriptions = {
+        home: 'Bienvenue dans votre espace de facturation',
         dashboard: "Vue d'ensemble de votre activité",
         customers: "Gérez vos clients et leurs informations",
         invoices: "Créez et suivez vos factures",
@@ -365,6 +367,7 @@ export default {
     },
     currentPageIcon() {
       const icons = {
+        home: 'pi pi-home',
         dashboard: "pi pi-home",
         customers: "pi pi-users",
         invoices: "pi pi-receipt",
@@ -377,9 +380,9 @@ export default {
     },
     breadcrumbs() {
       const route = this.$route;
-      const breadcrumbs = [{ label: "Accueil", icon: "pi pi-home", route: { name: "dashboard" } }];
+      const breadcrumbs = [{ label: "Accueil", icon: "pi pi-home", route: { name: "home" } }];
 
-      if (route.name !== "dashboard") {
+      if (route.name !== "home") {
         breadcrumbs.push({
           label: this.currentPageTitle,
           icon: this.currentPageIcon,
