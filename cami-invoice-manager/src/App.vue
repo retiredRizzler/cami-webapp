@@ -245,6 +245,7 @@
         </div>
       </div>
     </OverlayPanel>
+    <SpeedInsights />
 
     <!-- Mobile Bottom Navigation (Optional - For Future) -->
     <!--
@@ -294,6 +295,7 @@
 
 <script>
 import SideBar from "@/components/SideBar.vue";
+import { SpeedInsights } from '@vercel/speed-insights/vue';
 import { mapStores } from "pinia";
 import { useAuthStore } from "@/stores/AuthStore";
 

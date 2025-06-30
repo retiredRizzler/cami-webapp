@@ -14,6 +14,7 @@
     "@primevue/forms": "^4.3.5",
     "@supabase/supabase-js": "^2.49.8",
     "@tailwindcss/vite": "^4.1.7",
+    "@vercel/speed-insights": "^1.2.0",
     "cami-invoice-manager": "file:",
     "html2canvas": "^1.4.1",
     "jspdf": "^3.0.1",
