@@ -8,7 +8,7 @@
       <!-- Header Section -->
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold mb-2">Bienvenue sur CamInvoice</h1>
-        <p>Pour l'instant la connexion directe par email et mot de  <br> passe est désactivée. Connectez-vous via Google svp.</p>
+        <p>Pour l'instant la connexion directe par email et mot de passe est désactivée. Connectez-vous via Google svp.</p>
       </div>
 
       <!-- Login Card -->
