@@ -280,7 +280,7 @@
             <Button
               label="Facturer"
               icon="pi pi-receipt"
-              @click="createInvoiceFor(customer)"
+              @click="this.$router.push({name: 'invoices'})"
               severity="primary"
               outlined
               size="small"
@@ -679,7 +679,7 @@
           <Button
             label="Créer Facture"
             icon="pi pi-receipt"
-            @click="createInvoiceFromDetails"
+            @click="this.$router.push({name: 'invoices'})"
             severity="secondary"
             class="flex-1"
           />
@@ -709,7 +709,7 @@
         <Button
           label="Créer Facture"
           icon="pi pi-receipt"
-          @click="createInvoiceFor(selectedCustomer)"
+          @click="this.$router.push({name: 'invoices'})"
           variant="text"
           class="w-full justify-start"
           size="small"

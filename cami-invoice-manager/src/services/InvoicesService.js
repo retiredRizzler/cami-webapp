@@ -82,85 +82,163 @@ export class InvoicesService {
     }
   }
 
+  // Ajouter cette méthode dans la classe InvoicesService
+/**
+ * Génère un nouveau numéro de facture côté client
+ * Format: YYYY-MM-NNNN (ex: 2025-01-0001)
+ */
+async generateInvoiceNumber() {
+  try {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('User not authenticated')
+
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const prefix = `${year}-${month}-`
+
+    // Récupérer toutes les factures de l'utilisateur pour ce mois
+    const { data: existingInvoices, error } = await supabase
+      .from('invoices')
+      .select('invoice_number')
+      .eq('user_id', user.id)
+      .like('invoice_number', `${prefix}%`)
+      .order('invoice_number', { ascending: false })
+
+    if (error) throw error
+
+    // Calculer le prochain numéro
+    let nextNumber = 1
+    if (existingInvoices && existingInvoices.length > 0) {
+      // Extraire le numéro de la dernière facture du mois
+      const lastInvoice = existingInvoices[0]
+      const lastNumberMatch = lastInvoice.invoice_number.match(/(\d{4})$/)
+      if (lastNumberMatch) {
+        nextNumber = parseInt(lastNumberMatch[1]) + 1
+      }
+    }
+
+    // Formater le numéro final
+    const paddedNumber = String(nextNumber).padStart(4, '0')
+    return `${prefix}${paddedNumber}`
+
+  } catch (error) {
+    console.error('Error generating invoice number:', error)
+    throw new Error('Failed to generate invoice number')
+  }
+}
+
+
+/**
+ * Génère un numéro de facture unique avec retry en cas de conflit
+ */
+async generateUniqueInvoiceNumber(maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const candidateNumber = await this.generateInvoiceNumber()
+
+      // Vérifier que le numéro n'existe pas déjà
+      const { data: existing, error } = await supabase
+        .from('invoices')
+        .select('id')
+        .eq('invoice_number', candidateNumber)
+        .single()
+
+      if (error && error.code === 'PGRST116') {
+        // Aucune facture trouvée avec ce numéro, c'est bon
+        return candidateNumber
+      } else if (!error && existing) {
+        // Le numéro existe déjà, on retry
+        console.warn(`Invoice number ${candidateNumber} already exists, retrying... (attempt ${attempt})`)
+        if (attempt === maxRetries) {
+          throw new Error('Could not generate unique invoice number after multiple attempts')
+        }
+        // Attendre un peu avant de réessayer
+        await new Promise(resolve => setTimeout(resolve, 100))
+        continue
+      } else if (error) {
+        throw error
+      }
+
+      return candidateNumber
+    } catch (error) {
+      if (attempt === maxRetries) throw error
+      await new Promise(resolve => setTimeout(resolve, 100))
+    }
+  }
+}
+
   /**
    * Create a new invoice with items
    */
   async createInvoiceWithItems(invoiceData, itemsData) {
-    try {
-      // Get current user
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("User not authenticated");
+  try {
+    // Get current user
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('User not authenticated')
 
-      // Validate input data
-      const invoiceValidation = this.validateInvoiceData(invoiceData);
-      if (!invoiceValidation.isValid) {
-        throw new Error(`Invoice validation failed: ${invoiceValidation.errors.join(", ")}`);
-      }
+    // Validate input data
+    const invoiceValidation = this.validateInvoiceData(invoiceData)
+    if (!invoiceValidation.isValid) {
+      throw new Error(`Invoice validation failed: ${invoiceValidation.errors.join(', ')}`)
+    }
 
-      // Validate items if provided
-      if (itemsData && itemsData.length > 0) {
-        for (let i = 0; i < itemsData.length; i++) {
-          const itemValidation = this.validateInvoiceItemData(itemsData[i]);
-          if (!itemValidation.isValid) {
-            throw new Error(`Item ${i + 1} validation failed: ${itemValidation.errors.join(", ")}`);
-          }
+    // Validate items if provided
+    if (itemsData && itemsData.length > 0) {
+      for (let i = 0; i < itemsData.length; i++) {
+        const itemValidation = this.validateInvoiceItemData(itemsData[i])
+        if (!itemValidation.isValid) {
+          throw new Error(`Item ${i + 1} validation failed: ${itemValidation.errors.join(', ')}`)
         }
       }
-
-      // Generate invoice number
-      const { data: invoiceNumber, error: numberError } = await supabase.rpc(
-        "generate_invoice_number",
-        { p_user_id: user.id }
-      );
-
-      if (numberError) throw numberError;
-
-      // Prepare invoice data with calculated totals
-      const totals = this._calculateTotals(itemsData || [], invoiceData.tax_rate || 21.0);
-
-      const dataToInsert = {
-        ...invoiceData,
-        user_id: user.id,
-        invoice_number: invoiceNumber,
-        invoice_date: invoiceData.invoice_date || new Date().toISOString().split("T")[0],
-        due_date: invoiceData.due_date || this._calculateDueDate(invoiceData.invoice_date),
-        status: invoiceData.status || "draft",
-        tax_rate: invoiceData.tax_rate || 21.0,
-        subtotal: totals.subtotal,
-        tax_amount: totals.taxAmount,
-        total_amount: totals.totalAmount,
-      };
-
-      // Create invoice
-      const { data: invoice, error: invoiceError } = await supabase
-        .from("invoices")
-        .insert([dataToInsert])
-        .select()
-        .single();
-
-      if (invoiceError) throw invoiceError;
-
-      // Add items if provided
-      if (itemsData && itemsData.length > 0) {
-        const itemsToInsert = itemsData.map((item) => ({
-          ...this._prepareItemData(item),
-          invoice_id: invoice.id,
-        }));
-
-        const { error: itemsError } = await supabase.from("invoice_items").insert(itemsToInsert);
-
-        if (itemsError) throw itemsError;
-      }
-
-      // Return the complete invoice
-      return await this.getInvoice(invoice.id);
-    } catch (error) {
-      console.error("Error creating invoice with items:", error);
-      throw error;
     }
+
+    // Generate invoice number côté client
+    const invoiceNumber = await this.generateUniqueInvoiceNumber()
+
+    // Prepare invoice data with calculated totals
+    const totals = this._calculateTotals(itemsData || [], invoiceData.tax_rate || 21.0)
+
+    const dataToInsert = {
+      ...invoiceData,
+      user_id: user.id,
+      invoice_number: invoiceNumber,
+      invoice_date: invoiceData.invoice_date || new Date().toISOString().split('T')[0],
+      due_date: invoiceData.due_date || this._calculateDueDate(invoiceData.invoice_date),
+      status: invoiceData.status || 'draft',
+      tax_rate: invoiceData.tax_rate || 21.0,
+      subtotal: totals.subtotal,
+      tax_amount: totals.taxAmount,
+      total_amount: totals.totalAmount,
+    }
+
+    // Create invoice
+    const { data: invoice, error: invoiceError } = await supabase
+      .from('invoices')
+      .insert([dataToInsert])
+      .select()
+      .single()
+
+    if (invoiceError) throw invoiceError
+
+    // Add items if provided
+    if (itemsData && itemsData.length > 0) {
+      const itemsToInsert = itemsData.map((item) => ({
+        ...this._prepareItemData(item),
+        invoice_id: invoice.id,
+      }))
+
+      const { error: itemsError } = await supabase.from('invoice_items').insert(itemsToInsert)
+      if (itemsError) throw itemsError
+    }
+
+    // Return the complete invoice
+    return await this.getInvoice(invoice.id)
+  } catch (error) {
+    console.error('Error creating invoice with items:', error)
+    throw error
   }
+}
 
   /**
    * Update an existing invoice with items
