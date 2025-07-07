@@ -1,373 +1,410 @@
 <template>
-  <div class="p-4">
-    <Form
-      v-slot="$form"
-      :resolver="resolver"
-      :initialValues="initialValues"
-      @submit="onFormSubmit"
-      class="flex flex-col gap-6"
-    >
-      <!-- Informations d'en-tête de la facture -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1">
-          <FloatLabel variant="on">
-            <Select
-              id="customer_id"
-              name="customer_id"
-              :options="customers"
-              optionLabel="label"
-              optionValue="id"
-              filter
-              fluid
-              :invalid="$form.customer_id?.invalid"
-              :loading="customersLoading"
-            />
-            <label for="customer_id">Client *</label>
-          </FloatLabel>
-          <Message v-if="$form.customer_id?.invalid" severity="error" size="small">
-            {{ $form.customer_id.error?.message }}
-          </Message>
+  <div class="relative">
+    <!-- Mobile Floating Action Header - Uniquement visible sur mobile -->
+    <div v-if="isMobile" class="sticky top-0 z-10 bg-white border-b border-surface-200 p-3 mb-4 -mx-4 -mt-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <i class="pi pi-receipt text-primary"></i>
+          <span class="font-medium text-sm">{{ isEditing ? 'Modifier' : 'Nouvelle' }} Facture</span>
         </div>
-
-        <div class="flex flex-col gap-1">
-          <FloatLabel variant="on">
-            <DatePicker
-              id="invoice_date"
-              name="invoice_date"
-              fluid
-              :invalid="$form.invoice_date?.invalid"
-              dateFormat="dd/mm/yy"
-              :manualInput="false"
-              @update:modelValue="onInvoiceDateChange"
-            />
-            <label for="invoice_date">Date de facture *</label>
-          </FloatLabel>
-          <Message v-if="$form.invoice_date?.invalid" severity="error" size="small">
-            {{ $form.invoice_date.error?.message }}
-          </Message>
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <FloatLabel variant="on">
-            <DatePicker
-              id="due_date"
-              name="due_date"
-              fluid
-              :invalid="$form.due_date?.invalid"
-              dateFormat="dd/mm/yy"
-              :manualInput="false"
-              @update:modelValue="onDueDateChange"
-            />
-            <label for="due_date">Date d'échéance</label>
-          </FloatLabel>
-          <Message v-if="$form.due_date?.invalid" severity="error" size="small">
-            {{ $form.due_date.error?.message }}
-          </Message>
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <FloatLabel variant="on">
-            <Select
-              id="status"
-              name="status"
-              :options="statusOptions"
-              optionLabel="label"
-              optionValue="value"
-              fluid
-              :invalid="$form.status?.invalid"
-            />
-            <label for="status">Statut</label>
-          </FloatLabel>
-          <Message v-if="$form.status?.invalid" severity="error" size="small">
-            {{ $form.status.error?.message }}
-          </Message>
-        </div>
-
-        <div class="flex flex-col gap-1">
-          <FloatLabel variant="on">
-            <InputNumber
-              id="tax_rate"
-              name="tax_rate"
-              mode="decimal"
-              :minFractionDigits="2"
-              :maxFractionDigits="2"
-              suffix="%"
-              showButtons
-              fluid
-              :invalid="$form.tax_rate?.invalid"
-              @update:modelValue="onTaxRateChange"
-            />
-            <label for="tax_rate">Taux de TVA (%)</label>
-          </FloatLabel>
-          <Message v-if="$form.tax_rate?.invalid" severity="error" size="small">
-            {{ $form.tax_rate.error?.message }}
-          </Message>
-        </div>
-      </div>
-
-      <!-- Section des services de facture -->
-      <div>
-        <div class="flex justify-between items-center mb-4">
-          <h3 class="text-lg font-semibold">Services de la facture</h3>
+        <div class="flex gap-2">
           <Button
             type="button"
-            icon="pi pi-plus"
-            label="Ajouter un service"
+            label="Annuler"
+            severity="secondary"
+            outlined
+            @click="$emit('cancel')"
             size="small"
-            @click="addItem"
+            class="px-3"
+          />
+          <Button
+            type="submit"
+            :label="isEditing ? 'Sauvegarder' : 'Créer'"
+            :loading="loading"
+            icon="pi pi-check"
+            size="small"
+            class="px-3"
+            @click="submitForm"
           />
         </div>
+      </div>
+    </div>
 
-        <!-- Liste des services -->
-        <div v-if="invoiceItems.length > 0" class="space-y-4">
-          <div
-            v-for="(item, index) in invoiceItems"
-            :key="index"
-            class="border rounded p-4 bg-surface-50"
-          >
-            <!-- Sélection du type de service -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
-              <div class="md:col-span-2">
-                <FloatLabel variant="on">
-                  <Select
-                    v-model="item.service_type_id"
-                    :options="serviceTypes"
-                    optionLabel="name"
-                    optionValue="id"
-                    placeholder="Sélectionner un type de service"
-                    filter
-                    fluid
-                    @change="onServiceTypeChange(index, $event)"
-                  >
-                    <template #value="slotProps">
-                      <div v-if="slotProps.value" class="flex items-center">
-                        <i class="pi pi-tag mr-2 text-sm"></i>
-                        <div>{{ getServiceTypeName(slotProps.value) }}</div>
-                      </div>
-                      <span v-else>{{ slotProps.placeholder }}</span>
-                    </template>
+    <!-- Formulaire principal -->
+    <div class="p-4">
+      <Form
+        ref="invoiceForm"
+        v-slot="$form"
+        :resolver="resolver"
+        :initialValues="initialValues"
+        @submit="onFormSubmit"
+        class="flex flex-col gap-6"
+      >
+        <!-- Informations d'en-tête de la facture -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <FloatLabel variant="on">
+              <Select
+                id="customer_id"
+                name="customer_id"
+                :options="customers"
+                optionLabel="label"
+                optionValue="id"
+                filter
+                fluid
+                :invalid="$form.customer_id?.invalid"
+                :loading="customersLoading"
+              />
+              <label for="customer_id">Client *</label>
+            </FloatLabel>
+            <Message v-if="$form.customer_id?.invalid" severity="error" size="small">
+              {{ $form.customer_id.error?.message }}
+            </Message>
+          </div>
 
-                    <template #option="slotProps">
-                      <div class="flex items-center justify-between w-full">
-                        <div class="flex items-center">
+          <div class="flex flex-col gap-1">
+            <FloatLabel variant="on">
+              <DatePicker
+                id="invoice_date"
+                name="invoice_date"
+                fluid
+                :invalid="$form.invoice_date?.invalid"
+                dateFormat="dd/mm/yy"
+                :manualInput="false"
+                @update:modelValue="onInvoiceDateChange"
+              />
+              <label for="invoice_date">Date de facture *</label>
+            </FloatLabel>
+            <Message v-if="$form.invoice_date?.invalid" severity="error" size="small">
+              {{ $form.invoice_date.error?.message }}
+            </Message>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <FloatLabel variant="on">
+              <DatePicker
+                id="due_date"
+                name="due_date"
+                fluid
+                :invalid="$form.due_date?.invalid"
+                dateFormat="dd/mm/yy"
+                :manualInput="false"
+                @update:modelValue="onDueDateChange"
+              />
+              <label for="due_date">Date d'échéance</label>
+            </FloatLabel>
+            <Message v-if="$form.due_date?.invalid" severity="error" size="small">
+              {{ $form.due_date.error?.message }}
+            </Message>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <FloatLabel variant="on">
+              <Select
+                id="status"
+                name="status"
+                :options="statusOptions"
+                optionLabel="label"
+                optionValue="value"
+                fluid
+                :invalid="$form.status?.invalid"
+              />
+              <label for="status">Statut</label>
+            </FloatLabel>
+            <Message v-if="$form.status?.invalid" severity="error" size="small">
+              {{ $form.status.error?.message }}
+            </Message>
+          </div>
+
+          <div class="flex flex-col gap-1">
+            <FloatLabel variant="on">
+              <InputNumber
+                id="tax_rate"
+                name="tax_rate"
+                mode="decimal"
+                :minFractionDigits="2"
+                :maxFractionDigits="2"
+                suffix="%"
+                showButtons
+                fluid
+                :invalid="$form.tax_rate?.invalid"
+                @update:modelValue="onTaxRateChange"
+              />
+              <label for="tax_rate">Taux de TVA (%)</label>
+            </FloatLabel>
+            <Message v-if="$form.tax_rate?.invalid" severity="error" size="small">
+              {{ $form.tax_rate.error?.message }}
+            </Message>
+          </div>
+        </div>
+
+        <!-- Section des services de facture -->
+        <div>
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">Services de la facture</h3>
+            <Button
+              type="button"
+              icon="pi pi-plus"
+              label="Ajouter un service"
+              size="small"
+              @click="addItem"
+            />
+          </div>
+
+          <!-- Liste des services -->
+          <div v-if="invoiceItems.length > 0" class="space-y-4">
+            <div
+              v-for="(item, index) in invoiceItems"
+              :key="index"
+              class="border rounded p-4 bg-surface-50"
+            >
+              <!-- Sélection du type de service -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                <div class="md:col-span-2">
+                  <FloatLabel variant="on">
+                    <Select
+                      v-model="item.service_type_id"
+                      :options="serviceTypes"
+                      optionLabel="name"
+                      optionValue="id"
+                      placeholder="Sélectionner un type de service"
+                      filter
+                      fluid
+                      @change="onServiceTypeChange(index, $event)"
+                    >
+                      <template #value="slotProps">
+                        <div v-if="slotProps.value" class="flex items-center">
                           <i class="pi pi-tag mr-2 text-sm"></i>
-                          <div>
-                            <div class="font-medium">{{ slotProps.option.name }}</div>
-                            <div class="text-xs text-muted-color">
-                              €{{ slotProps.option.unit_price }}/{{
-                                translatePricingType(slotProps.option.pricing_type)
-                              }}
-                              • {{ translateCategory(slotProps.option.category) }}
+                          <div>{{ getServiceTypeName(slotProps.value) }}</div>
+                        </div>
+                        <span v-else>{{ slotProps.placeholder }}</span>
+                      </template>
+
+                      <template #option="slotProps">
+                        <div class="flex items-center justify-between w-full">
+                          <div class="flex items-center">
+                            <i class="pi pi-tag mr-2 text-sm"></i>
+                            <div>
+                              <div class="font-medium">{{ slotProps.option.name }}</div>
+                              <div class="text-xs text-muted-color">
+                                €{{ slotProps.option.unit_price }}/{{
+                                  translatePricingType(slotProps.option.pricing_type)
+                                }}
+                                • {{ translateCategory(slotProps.option.category) }}
+                              </div>
                             </div>
                           </div>
+                          <Tag
+                            :value="translatePricingType(slotProps.option.pricing_type)"
+                            :severity="getPricingTypeSeverity(slotProps.option.pricing_type)"
+                            size="small"
+                          />
                         </div>
-                        <Tag
-                          :value="translatePricingType(slotProps.option.pricing_type)"
-                          :severity="getPricingTypeSeverity(slotProps.option.pricing_type)"
-                          size="small"
-                        />
-                      </div>
-                    </template>
+                      </template>
 
-                    <template #header>
-                      <div class="font-medium p-3 border-b">Types de services disponibles</div>
-                    </template>
+                      <template #header>
+                        <div class="font-medium p-3 border-b">Types de services disponibles</div>
+                      </template>
 
-                    <template #footer>
-                      <div class="p-3 border-t">
-                        <Button
-                          label="Ajouter un nouveau type de service"
-                          fluid
-                          severity="secondary"
-                          text
-                          size="small"
-                          icon="pi pi-plus"
-                          @click="openAddServiceDialog"
-                        />
-                      </div>
-                    </template>
-                  </Select>
-                  <label></label>
-                </FloatLabel>
-              </div>
-            </div>
-
-            <!-- Détails de le service -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
-              <div class="md:col-span-2">
-                <FloatLabel variant="on">
-                  <InputText v-model="item.description" fluid />
-                  <label>Description *</label>
-                </FloatLabel>
-              </div>
-
-              <div>
-                <FloatLabel variant="on">
-                  <InputNumber
-                    v-model="item.quantity"
-                    mode="decimal"
-                    :minFractionDigits="0"
-                    :maxFractionDigits="2"
-                    :min="0.01"
-                    fluid
-                    @update:modelValue="calculateItemTotal(index)"
-                  />
-                  <label>Quantité</label>
-                </FloatLabel>
-              </div>
-
-              <div>
-                <FloatLabel variant="on">
-                  <InputNumber
-                    v-model="item.unit_price"
-                    mode="currency"
-                    currency="EUR"
-                    locale="fr-FR"
-                    fluid
-                    @update:modelValue="calculateItemTotal(index)"
-                  />
-                  <label>Prix unitaire</label>
-                </FloatLabel>
-              </div>
-            </div>
-
-            <!-- Détails supplémentaires -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-              <div>
-                <FloatLabel variant="on">
-                  <InputNumber
-                    v-model="item.duration_hours"
-                    mode="decimal"
-                    :minFractionDigits="1"
-                    :maxFractionDigits="2"
-                    :min="0"
-                    suffix="h"
-                    fluid
-                  />
-                  <label>Durée</label>
-                </FloatLabel>
-              </div>
-
-              <div>
-                <FloatLabel variant="on">
-                  <DatePicker
-                    v-model="item.service_date"
-                    fluid
-                    dateFormat="dd/mm/yy"
-                    :manualInput="false"
-                    @update:modelValue="(newDate) => onServiceDateChange(index, newDate)"
-                  />
-                  <label>Date de service</label>
-                </FloatLabel>
-              </div>
-
-              <div class="flex items-center">
-                <div class="text-right flex-1">
-                  <div class="text-sm text-muted-color">Total</div>
-                  <div class="font-bold text-lg">€{{ (item.total_price || 0).toFixed(2) }}</div>
+                      <template #footer>
+                        <div class="p-3 border-t">
+                          <Button
+                            label="Ajouter un nouveau type de service"
+                            fluid
+                            severity="secondary"
+                            text
+                            size="small"
+                            icon="pi pi-plus"
+                            @click="openAddServiceDialog"
+                          />
+                        </div>
+                      </template>
+                    </Select>
+                    <label></label>
+                  </FloatLabel>
                 </div>
               </div>
 
-              <div class="flex justify-end items-center">
-                <Button
-                  type="button"
-                  icon="pi pi-trash"
-                  severity="danger"
-                  text
-                  @click="removeItem(index)"
-                  v-tooltip.top="'Supprimer le service'"
-                />
+              <!-- Détails de le service -->
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
+                <div class="md:col-span-2">
+                  <FloatLabel variant="on">
+                    <InputText v-model="item.description" fluid />
+                    <label>Description *</label>
+                  </FloatLabel>
+                </div>
+
+                <div>
+                  <FloatLabel variant="on">
+                    <InputNumber
+                      v-model="item.quantity"
+                      mode="decimal"
+                      :minFractionDigits="0"
+                      :maxFractionDigits="2"
+                      :min="0.01"
+                      fluid
+                      @update:modelValue="calculateItemTotal(index)"
+                    />
+                    <label>Quantité</label>
+                  </FloatLabel>
+                </div>
+
+                <div>
+                  <FloatLabel variant="on">
+                    <InputNumber
+                      v-model="item.unit_price"
+                      mode="currency"
+                      currency="EUR"
+                      locale="fr-FR"
+                      fluid
+                      @update:modelValue="calculateItemTotal(index)"
+                    />
+                    <label>Prix unitaire</label>
+                  </FloatLabel>
+                </div>
+              </div>
+
+              <!-- Détails supplémentaires -->
+              <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <div>
+                  <FloatLabel variant="on">
+                    <InputNumber
+                      v-model="item.duration_hours"
+                      mode="decimal"
+                      :minFractionDigits="1"
+                      :maxFractionDigits="2"
+                      :min="0"
+                      suffix="h"
+                      fluid
+                    />
+                    <label>Durée</label>
+                  </FloatLabel>
+                </div>
+
+                <div>
+                  <FloatLabel variant="on">
+                    <DatePicker
+                      v-model="item.service_date"
+                      fluid
+                      dateFormat="dd/mm/yy"
+                      :manualInput="false"
+                      @update:modelValue="(newDate) => onServiceDateChange(index, newDate)"
+                    />
+                    <label>Date de service</label>
+                  </FloatLabel>
+                </div>
+
+                <div class="flex items-center">
+                  <div class="text-right flex-1">
+                    <div class="text-sm text-muted-color">Total</div>
+                    <div class="font-bold text-lg">€{{ (item.total_price || 0).toFixed(2) }}</div>
+                  </div>
+                </div>
+
+                <div class="flex justify-end items-center">
+                  <Button
+                    type="button"
+                    icon="pi pi-trash"
+                    severity="danger"
+                    text
+                    @click="removeItem(index)"
+                    v-tooltip.top="'Supprimer le service'"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- État vide -->
+          <div v-else class="text-center py-8 border-2 border-dashed border-surface-300 rounded">
+            <i class="pi pi-plus text-2xl text-muted-color mb-2"></i>
+            <p class="text-muted-color">
+              Aucun service ajouté. Cliquez sur "Ajouter un service" pour commencer.
+            </p>
+          </div>
+        </div>
+
+        <!-- Totaux de la facture -->
+        <div v-if="invoiceItems.length > 0" class="border-t pt-4">
+          <div class="flex justify-end">
+            <div class="w-80 space-y-2">
+              <div class="flex justify-between">
+                <span>Sous-total :</span>
+                <span>€{{ subtotal.toFixed(2) }}</span>
+              </div>
+              <div class="flex justify-between">
+                <span>TVA ({{ currentTaxRate }}%) :</span>
+                <span>€{{ taxAmount.toFixed(2) }}</span>
+              </div>
+              <div class="flex justify-between font-bold text-lg border-t pt-2">
+                <span>Total TTC :</span>
+                <span>€{{ totalAmount.toFixed(2) }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- État vide -->
-        <div v-else class="text-center py-8 border-2 border-dashed border-surface-300 rounded">
-          <i class="pi pi-plus text-2xl text-muted-color mb-2"></i>
-          <p class="text-muted-color">
-            Aucun service ajouté. Cliquez sur "Ajouter un service" pour commencer.
-          </p>
-        </div>
-      </div>
+        <!-- Notes et conditions de paiement -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="flex flex-col gap-1">
+            <FloatLabel variant="on">
+              <Textarea id="notes" name="notes" rows="3" fluid :invalid="$form.notes?.invalid" />
+              <label for="notes">Notes</label>
+            </FloatLabel>
+            <Message v-if="$form.notes?.invalid" severity="error" size="small">
+              {{ $form.notes.error?.message }}
+            </Message>
+          </div>
 
-      <!-- Totaux de la facture -->
-      <div v-if="invoiceItems.length > 0" class="border-t pt-4">
-        <div class="flex justify-end">
-          <div class="w-80 space-y-2">
-            <div class="flex justify-between">
-              <span>Sous-total :</span>
-              <span>€{{ subtotal.toFixed(2) }}</span>
-            </div>
-            <div class="flex justify-between">
-              <span>TVA ({{ currentTaxRate }}%) :</span>
-              <span>€{{ taxAmount.toFixed(2) }}</span>
-            </div>
-            <div class="flex justify-between font-bold text-lg border-t pt-2">
-              <span>Total TTC :</span>
-              <span>€{{ totalAmount.toFixed(2) }}</span>
-            </div>
+          <div class="flex flex-col gap-1">
+            <FloatLabel variant="on">
+              <Textarea
+                id="payment_terms"
+                name="payment_terms"
+                rows="3"
+                fluid
+                :invalid="$form.payment_terms?.invalid"
+              />
+              <label for="payment_terms">Conditions de paiement</label>
+            </FloatLabel>
+            <Message v-if="$form.payment_terms?.invalid" severity="error" size="small">
+              {{ $form.payment_terms.error?.message }}
+            </Message>
           </div>
         </div>
-      </div>
 
-      <!-- Notes et conditions de paiement -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="flex flex-col gap-1">
-          <FloatLabel variant="on">
-            <Textarea id="notes" name="notes" rows="3" fluid :invalid="$form.notes?.invalid" />
-            <label for="notes">Notes</label>
-          </FloatLabel>
-          <Message v-if="$form.notes?.invalid" severity="error" size="small">
-            {{ $form.notes.error?.message }}
-          </Message>
+        <!-- Actions du formulaire - Masquer sur mobile car dans le header -->
+        <div :class="isMobile ? 'hidden' : 'flex justify-end gap-2 pt-4 border-t'">
+          <Button
+            type="button"
+            label="Annuler"
+            severity="secondary"
+            outlined
+            @click="$emit('cancel')"
+          />
+          <Button
+            type="submit"
+            :label="isEditing ? 'Modifier la facture' : 'Créer la facture'"
+            :loading="loading"
+            icon="pi pi-check"
+          />
         </div>
+      </Form>
 
-        <div class="flex flex-col gap-1">
-          <FloatLabel variant="on">
-            <Textarea
-              id="payment_terms"
-              name="payment_terms"
-              rows="3"
-              fluid
-              :invalid="$form.payment_terms?.invalid"
-            />
-            <label for="payment_terms">Conditions de paiement</label>
-          </FloatLabel>
-          <Message v-if="$form.payment_terms?.invalid" severity="error" size="small">
-            {{ $form.payment_terms.error?.message }}
-          </Message>
-        </div>
-      </div>
+      <!-- Dialogue d'ajout de type de service -->
+      <Dialog
+        v-model:visible="showAddServiceDialog"
+        header="Ajouter un nouveau type de service"
+        modal
+        class="w-full max-w-md"
+        :closable="true"
+      >
+        <ServiceTypeForm @save="onServiceTypeSaved" @cancel="closeAddServiceDialog" />
+      </Dialog>
+    </div>
 
-      <!-- Actions du formulaire -->
-      <div class="flex justify-end gap-2 pt-4 border-t">
-        <Button
-          type="button"
-          label="Annuler"
-          severity="secondary"
-          outlined
-          @click="$emit('cancel')"
-        />
-        <Button
-          type="submit"
-          :label="isEditing ? 'Modifier la facture' : 'Créer la facture'"
-          :loading="loading"
-          icon="pi pi-check"
-        />
-      </div>
-    </Form>
-
-    <!-- Dialogue d'ajout de type de service -->
-    <Dialog
-      v-model:visible="showAddServiceDialog"
-      header="Ajouter un nouveau type de service"
-      modal
-      class="w-full max-w-md"
-      :closable="true"
-    >
-      <ServiceTypeForm @save="onServiceTypeSaved" @cancel="closeAddServiceDialog" />
-    </Dialog>
+    <!-- Zone de sécurité mobile pour éviter que les boutons soient cachés -->
+    <div v-if="isMobile" class="mobile-safe-area"></div>
   </div>
 </template>
 
@@ -404,6 +441,7 @@ export default {
       customersLoading: false,
       serviceTypesLoading: false,
       showAddServiceDialog: false,
+      isMobile: false,
 
       customers: [],
       serviceTypes: [],
@@ -518,9 +556,29 @@ export default {
 
   async created() {
     await Promise.all([this.loadCustomers(), this.loadServiceTypes()]);
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile);
+  },
+
+  beforeUnmount() {
+    window.removeEventListener('resize', this.checkMobile);
   },
 
   methods: {
+    checkMobile() {
+      this.isMobile = window.innerWidth < 768;
+    },
+
+    // Méthode pour soumettre depuis le header mobile
+    submitForm() {
+      if (this.$refs.invoiceForm) {
+        // Déclencher la soumission du formulaire
+        const form = this.$refs.invoiceForm.$el;
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+        form.dispatchEvent(submitEvent);
+      }
+    },
+
     async loadCustomers() {
       this.customersLoading = true;
       try {
@@ -784,3 +842,308 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+/* Header flottant mobile avec ombre et backdrop blur */
+@media (max-width: 768px) {
+  .sticky.top-0 {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+
+  /* Amélioration des cibles tactiles sur mobile */
+  .p-button {
+    min-height: 48px;
+    font-size: 16px; /* Empêcher le zoom sur iOS */
+  }
+
+  .p-button-sm {
+    min-height: 40px;
+    font-size: 14px;
+  }
+
+  /* Amélioration des champs de saisie pour mobile */
+  .p-inputtext,
+  .p-textarea,
+  .p-inputnumber-input,
+  .p-datepicker-input {
+    min-height: 48px;
+    font-size: 16px; /* Empêcher le zoom sur iOS */
+  }
+
+  /* Zone de sécurité mobile pour éviter que le contenu soit caché */
+  .mobile-safe-area {
+    height: 80px; /* Espace pour la barre d'URL mobile */
+    padding-bottom: env(safe-area-inset-bottom, 0px); /* Support iPhone avec notch */
+  }
+
+  /* Amélioration de l'espacement sur mobile */
+  .gap-6 {
+    gap: 1rem;
+  }
+
+  .gap-4 {
+    gap: 0.75rem;
+  }
+
+  /* Amélioration du padding pour mobile */
+  .p-4 {
+    padding: 1rem;
+  }
+
+  /* Select et dropdown améliorés pour mobile */
+  .p-select {
+    min-height: 48px;
+  }
+
+  .p-select .p-select-label {
+    padding: 0.75rem;
+    font-size: 16px;
+  }
+
+  /* DatePicker amélioré pour mobile */
+  .p-datepicker-input {
+    padding: 0.75rem;
+  }
+
+  /* Amélioration des messages d'erreur */
+  .p-message {
+    font-size: 14px;
+    margin-top: 0.25rem;
+  }
+
+  /* Amélioration de la grille responsive */
+  .grid.grid-cols-1.md\:grid-cols-2 {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .grid.grid-cols-1.md\:grid-cols-4 {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  /* Amélioration des cards de services sur mobile */
+  .border.rounded.p-4.bg-surface-50 {
+    padding: 1rem;
+    border-radius: 0.5rem;
+  }
+
+  /* État vide amélioré pour mobile */
+  .text-center.py-8 {
+    padding: 2rem 1rem;
+  }
+
+  /* Totaux de facture responsive */
+  .w-80 {
+    width: 100%;
+    max-width: 20rem;
+  }
+}
+
+/* Amélioration des transitions et animations */
+.sticky.top-0 {
+  transition: all 0.3s ease;
+}
+
+/* Focus states améliorés pour l'accessibilité */
+.p-button:focus-visible,
+.p-inputtext:focus-visible,
+.p-textarea:focus-visible,
+.p-select:focus-visible,
+.p-datepicker:focus-visible {
+  outline: 2px solid var(--p-primary-color);
+  outline-offset: 2px;
+}
+
+/* Amélioration des hover states sur desktop */
+@media (min-width: 769px) {
+  .p-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .border.rounded.p-4.bg-surface-50:hover {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.2s ease;
+  }
+}
+
+/* Amélioration du scrolling sur mobile */
+@media (max-width: 768px) {
+  .relative {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Amélioration des dialogues sur mobile */
+  .p-dialog {
+    margin: 0 !important;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .p-dialog-content {
+    padding: 0 !important;
+  }
+}
+
+/* Support des nouvelles unités CSS viewport (Safari iOS 15.4+) */
+@supports (height: 100dvh) {
+  @media (max-width: 768px) {
+    .mobile-safe-area {
+      height: calc(100dvh - 100vh + 80px);
+    }
+  }
+}
+
+/* Support des zones sécurisées (iPhone avec notch) */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  @media (max-width: 768px) {
+    .mobile-safe-area {
+      padding-bottom: calc(env(safe-area-inset-bottom) + 20px);
+    }
+  }
+}
+
+/* Amélioration de la lisibilité des textes */
+.font-semibold {
+  font-weight: 600;
+}
+
+.font-bold {
+  font-weight: 700;
+}
+
+.text-muted-color {
+  color: var(--p-surface-600);
+}
+
+/* Amélioration des icônes */
+.pi {
+  font-size: 1rem;
+}
+
+@media (max-width: 768px) {
+  .pi {
+    font-size: 0.875rem;
+  }
+}
+
+/* Amélioration des tags */
+.p-tag {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+
+/* Amélioration des tooltips sur mobile */
+@media (max-width: 768px) {
+  .p-tooltip {
+    font-size: 14px;
+    padding: 0.5rem;
+  }
+}
+
+/* Amélioration de la zone de drop pour les services */
+.border-2.border-dashed {
+  border-width: 2px;
+  border-style: dashed;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.border-2.border-dashed:hover {
+  border-color: var(--p-primary-color);
+  background-color: var(--p-primary-50);
+}
+
+/* Amélioration des formulaires imbriqués */
+.space-y-4 > * + * {
+  margin-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .space-y-4 > * + * {
+    margin-top: 0.75rem;
+  }
+}
+
+/* Amélioration des boutons de suppression */
+.p-button[severity="danger"] {
+  transition: all 0.2s ease;
+}
+
+.p-button[severity="danger"]:hover {
+  transform: scale(1.05);
+}
+
+/* Amélioration de la section totaux */
+.border-t.pt-4 {
+  border-top: 1px solid var(--p-surface-200);
+  padding-top: 1rem;
+}
+
+@media (max-width: 768px) {
+  .border-t.pt-4 {
+    margin-top: 1rem;
+    padding-top: 1rem;
+  }
+
+  .flex.justify-end {
+    justify-content: center;
+  }
+}
+
+/* Amélioration des labels flottants */
+.p-floatlabel {
+  position: relative;
+}
+
+.p-floatlabel label {
+  transition: all 0.2s ease;
+}
+
+/* Animation des éléments qui apparaissent */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.space-y-4 > div {
+  animation: fadeInUp 0.3s ease;
+}
+
+/* Responsive pour les très petits écrans */
+@media (max-width: 480px) {
+  .p-4 {
+    padding: 0.75rem;
+  }
+
+  .sticky.top-0 {
+    padding: 0.75rem;
+    margin: -0.75rem -0.75rem 1rem -0.75rem;
+  }
+
+  .p-button-sm .px-3 {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+}
+
+/* Dark mode support (si activé dans PrimeVue) */
+@media (prefers-color-scheme: dark) {
+  .sticky.top-0 {
+    background-color: rgba(31, 41, 55, 0.95);
+    border-color: var(--p-surface-700);
+  }
+
+  .mobile-safe-area {
+    background-color: var(--p-surface-900);
+  }
+}
+</style>
