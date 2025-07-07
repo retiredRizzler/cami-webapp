@@ -16,7 +16,7 @@
             fluid
             :invalid="$form.name?.invalid"
           />
-          <label for="name">Service Name *</label>
+          <label for="name">Nom du service *</label>
         </FloatLabel>
         <Message v-if="$form.name?.invalid" severity="error" size="small">
           {{ $form.name.error?.message }}
@@ -53,7 +53,7 @@
               fluid
               :invalid="$form.category?.invalid"
             />
-            <label for="category">Category *</label>
+            <label for="category">Catégorie *</label>
           </FloatLabel>
           <Message v-if="$form.category?.invalid" severity="error" size="small">
             {{ $form.category.error?.message }}
@@ -88,7 +88,9 @@
               name="unit_price"
               mode="currency"
               currency="EUR"
-              locale="de-DE"
+              locale="fr-FR"
+              showButtons
+              :min="0"
               fluid
               :invalid="$form.unit_price?.invalid"
             />
@@ -109,6 +111,7 @@
               :maxFractionDigits="2"
               :min="0"
               suffix="h"
+              showButtons
               fluid
               :invalid="$form.default_duration_hours?.invalid"
             />
@@ -127,7 +130,7 @@
           name="is_recurring"
           binary
         />
-        <label for="is_recurring" class="text-sm">This is a recurring service</label>
+        <label for="is_recurring" class="text-sm">Service récurent</label>
       </div>
 
       <!-- Form Actions -->
@@ -201,15 +204,15 @@ export default {
       loading: false,
 
       categoryOptions: [
-        { label: "Individual Lesson", value: "individual_lesson" },
-        { label: "Corporate Service", value: "corporate_service" },
-        { label: "Monthly Contract", value: "monthly_contract" }
+        { label: "Leçon individuelle", value: "individual_lesson" },
+        { label: "Service d'entreprise", value: "corporate_service" },
+        { label: "Contrat mensuel", value: "monthly_contract" }
       ],
 
       pricingTypeOptions: [
-        { label: "Hourly", value: "hourly" },
-        { label: "Fixed Price", value: "fixed" },
-        { label: "Monthly", value: "monthly" }
+        { label: "Horaire", value: "hourly" },
+        { label: "Prix Fixe", value: "fixed" },
+        { label: "Mensuel", value: "monthly" }
       ],
 
       // Service instance

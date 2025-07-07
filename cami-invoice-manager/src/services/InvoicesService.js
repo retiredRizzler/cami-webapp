@@ -82,163 +82,85 @@ export class InvoicesService {
     }
   }
 
-  // Ajouter cette méthode dans la classe InvoicesService
-/**
- * Génère un nouveau numéro de facture côté client
- * Format: YYYY-MM-NNNN (ex: 2025-01-0001)
- */
-async generateInvoiceNumber() {
-  try {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
-
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = String(now.getMonth() + 1).padStart(2, '0')
-    const prefix = `${year}-${month}-`
-
-    // Récupérer toutes les factures de l'utilisateur pour ce mois
-    const { data: existingInvoices, error } = await supabase
-      .from('invoices')
-      .select('invoice_number')
-      .eq('user_id', user.id)
-      .like('invoice_number', `${prefix}%`)
-      .order('invoice_number', { ascending: false })
-
-    if (error) throw error
-
-    // Calculer le prochain numéro
-    let nextNumber = 1
-    if (existingInvoices && existingInvoices.length > 0) {
-      // Extraire le numéro de la dernière facture du mois
-      const lastInvoice = existingInvoices[0]
-      const lastNumberMatch = lastInvoice.invoice_number.match(/(\d{4})$/)
-      if (lastNumberMatch) {
-        nextNumber = parseInt(lastNumberMatch[1]) + 1
-      }
-    }
-
-    // Formater le numéro final
-    const paddedNumber = String(nextNumber).padStart(4, '0')
-    return `${prefix}${paddedNumber}`
-
-  } catch (error) {
-    console.error('Error generating invoice number:', error)
-    throw new Error('Failed to generate invoice number')
-  }
-}
-
-
-/**
- * Génère un numéro de facture unique avec retry en cas de conflit
- */
-async generateUniqueInvoiceNumber(maxRetries = 3) {
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      const candidateNumber = await this.generateInvoiceNumber()
-
-      // Vérifier que le numéro n'existe pas déjà
-      const { data: existing, error } = await supabase
-        .from('invoices')
-        .select('id')
-        .eq('invoice_number', candidateNumber)
-        .single()
-
-      if (error && error.code === 'PGRST116') {
-        // Aucune facture trouvée avec ce numéro, c'est bon
-        return candidateNumber
-      } else if (!error && existing) {
-        // Le numéro existe déjà, on retry
-        console.warn(`Invoice number ${candidateNumber} already exists, retrying... (attempt ${attempt})`)
-        if (attempt === maxRetries) {
-          throw new Error('Could not generate unique invoice number after multiple attempts')
-        }
-        // Attendre un peu avant de réessayer
-        await new Promise(resolve => setTimeout(resolve, 100))
-        continue
-      } else if (error) {
-        throw error
-      }
-
-      return candidateNumber
-    } catch (error) {
-      if (attempt === maxRetries) throw error
-      await new Promise(resolve => setTimeout(resolve, 100))
-    }
-  }
-}
-
   /**
    * Create a new invoice with items
    */
   async createInvoiceWithItems(invoiceData, itemsData) {
-  try {
-    // Get current user
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('User not authenticated')
+    try {
+      // Get current user
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) throw new Error("User not authenticated");
 
-    // Validate input data
-    const invoiceValidation = this.validateInvoiceData(invoiceData)
-    if (!invoiceValidation.isValid) {
-      throw new Error(`Invoice validation failed: ${invoiceValidation.errors.join(', ')}`)
-    }
+      // Validate input data
+      const invoiceValidation = this.validateInvoiceData(invoiceData);
+      if (!invoiceValidation.isValid) {
+        throw new Error(`Invoice validation failed: ${invoiceValidation.errors.join(", ")}`);
+      }
 
-    // Validate items if provided
-    if (itemsData && itemsData.length > 0) {
-      for (let i = 0; i < itemsData.length; i++) {
-        const itemValidation = this.validateInvoiceItemData(itemsData[i])
-        if (!itemValidation.isValid) {
-          throw new Error(`Item ${i + 1} validation failed: ${itemValidation.errors.join(', ')}`)
+      // Validate items if provided
+      if (itemsData && itemsData.length > 0) {
+        for (let i = 0; i < itemsData.length; i++) {
+          const itemValidation = this.validateInvoiceItemData(itemsData[i]);
+          if (!itemValidation.isValid) {
+            throw new Error(`Item ${i + 1} validation failed: ${itemValidation.errors.join(", ")}`);
+          }
         }
       }
+
+      // Calculate totals
+      const totals = this._calculateTotals(itemsData || [], invoiceData.tax_rate || 21.0);
+
+      // S'assurer qu'on a une date de facture (requise pour la génération du numéro)
+      const invoiceDate = invoiceData.invoice_date || new Date().toISOString().split("T")[0];
+
+      const dataToInsert = {
+        ...invoiceData,
+        user_id: user.id,
+        invoice_date: invoiceDate, // Date choisie par l'utilisateur
+        due_date: invoiceData.due_date || this._calculateDueDate(invoiceDate),
+        status: invoiceData.status || "draft",
+        tax_rate: invoiceData.tax_rate || 21.0,
+        subtotal: totals.subtotal,
+        tax_amount: totals.taxAmount,
+        total_amount: totals.totalAmount,
+      };
+
+      console.log("Creating invoice with date:", invoiceDate); // Debug
+
+      // Create invoice (PostgreSQL génère invoice_number basé sur invoice_date)
+      const { data: invoice, error: invoiceError } = await supabase
+        .from("invoices")
+        .insert([dataToInsert])
+        .select()
+        .single();
+
+      if (invoiceError) {
+        console.error("Invoice creation error:", invoiceError);
+        throw invoiceError;
+      }
+
+      console.log("Generated invoice number:", invoice.invoice_number); // Debug
+
+      // Add items if provided
+      if (itemsData && itemsData.length > 0) {
+        const itemsToInsert = itemsData.map((item) => ({
+          ...this._prepareItemData(item),
+          invoice_id: invoice.id,
+        }));
+
+        const { error: itemsError } = await supabase.from("invoice_items").insert(itemsToInsert);
+        if (itemsError) throw itemsError;
+      }
+
+      // Return the complete invoice
+      return await this.getInvoice(invoice.id);
+    } catch (error) {
+      console.error("Error creating invoice with items:", error);
+      throw error;
     }
-
-    // Generate invoice number côté client
-    const invoiceNumber = await this.generateUniqueInvoiceNumber()
-
-    // Prepare invoice data with calculated totals
-    const totals = this._calculateTotals(itemsData || [], invoiceData.tax_rate || 21.0)
-
-    const dataToInsert = {
-      ...invoiceData,
-      user_id: user.id,
-      invoice_number: invoiceNumber,
-      invoice_date: invoiceData.invoice_date || new Date().toISOString().split('T')[0],
-      due_date: invoiceData.due_date || this._calculateDueDate(invoiceData.invoice_date),
-      status: invoiceData.status || 'draft',
-      tax_rate: invoiceData.tax_rate || 21.0,
-      subtotal: totals.subtotal,
-      tax_amount: totals.taxAmount,
-      total_amount: totals.totalAmount,
-    }
-
-    // Create invoice
-    const { data: invoice, error: invoiceError } = await supabase
-      .from('invoices')
-      .insert([dataToInsert])
-      .select()
-      .single()
-
-    if (invoiceError) throw invoiceError
-
-    // Add items if provided
-    if (itemsData && itemsData.length > 0) {
-      const itemsToInsert = itemsData.map((item) => ({
-        ...this._prepareItemData(item),
-        invoice_id: invoice.id,
-      }))
-
-      const { error: itemsError } = await supabase.from('invoice_items').insert(itemsToInsert)
-      if (itemsError) throw itemsError
-    }
-
-    // Return the complete invoice
-    return await this.getInvoice(invoice.id)
-  } catch (error) {
-    console.error('Error creating invoice with items:', error)
-    throw error
   }
-}
 
   /**
    * Update an existing invoice with items
@@ -639,7 +561,7 @@ async generateUniqueInvoiceNumber(maxRetries = 3) {
       const invoiceData = await this.getInvoice(invoiceId);
       const instructorData = await this._getInstructorProfile();
 
-      const pdfService =  new InvoiceHTMLPDFService();
+      const pdfService = new InvoiceHTMLPDFService();
 
       const pdf = await pdfService.generateInvoicePDF(invoiceData, instructorData);
 
@@ -926,5 +848,256 @@ async generateUniqueInvoiceNumber(maxRetries = 3) {
       cancelled: "secondary",
     };
     return severityMap[status] || "secondary";
+  }
+
+  // InvoicesService.js - Nouvelles méthodes pour les statistiques par période
+
+  /**
+   * Get invoice statistics by time period with comparison data
+   * @param {string} period - Period type ('current_month', 'current_year', etc.)
+   * @returns {Object} Statistics object with evolution data
+   */
+  async getInvoiceStatsByPeriod(period = "current_month") {
+    try {
+      // Obtenir les dates pour la période sélectionnée
+      const { startDate, endDate, previousStartDate, previousEndDate } =
+        this._getPeriodDates(period);
+
+      // Récupérer toutes les factures
+      const { data: allInvoices, error } = await supabase
+        .from("invoices")
+        .select("status, total_amount, invoice_date, due_date, created_at");
+
+      if (error) throw error;
+
+      // Filtrer les factures pour la période actuelle
+      const currentPeriodInvoices = allInvoices.filter((invoice) => {
+        const invoiceDate = new Date(invoice.invoice_date);
+        return invoiceDate >= startDate && invoiceDate <= endDate;
+      });
+
+      // Filtrer les factures pour la période précédente (pour comparaison)
+      const previousPeriodInvoices = allInvoices.filter((invoice) => {
+        const invoiceDate = new Date(invoice.invoice_date);
+        return invoiceDate >= previousStartDate && invoiceDate <= previousEndDate;
+      });
+
+      // Calculer les statistiques période actuelle
+      const currentStats = this._calculatePeriodStats(currentPeriodInvoices);
+
+      // Calculer les statistiques période précédente
+      const previousStats = this._calculatePeriodStats(previousPeriodInvoices);
+
+      // Calculer les évolutions en pourcentage
+      const invoicesEvolution = this._calculateEvolution(
+        currentStats.total_invoices,
+        previousStats.total_invoices
+      );
+
+      const revenueEvolution = this._calculateEvolution(
+        currentStats.total_revenue,
+        previousStats.total_revenue
+      );
+
+      // Retourner les statistiques complètes
+      return {
+        ...currentStats,
+        invoices_evolution: invoicesEvolution,
+        revenue_evolution: revenueEvolution,
+        period: period,
+        period_start: startDate.toISOString().split("T")[0],
+        period_end: endDate.toISOString().split("T")[0],
+      };
+    } catch (error) {
+      console.error("Error fetching stats by period:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Calculate statistics for a set of invoices
+   * @private
+   */
+  _calculatePeriodStats(invoices) {
+    const now = new Date();
+
+    // Factures en retard
+    const overdueInvoices = invoices.filter(
+      (i) =>
+        i.status !== "paid" && i.status !== "cancelled" && i.due_date && new Date(i.due_date) < now
+    );
+
+    // Factures en attente (sent + draft)
+    const pendingInvoices = invoices.filter((i) => i.status === "sent" || i.status === "draft");
+
+    // Factures payées
+    const paidInvoices = invoices.filter((i) => i.status === "paid");
+
+    // Calculs financiers
+    const totalRevenue = paidInvoices.reduce((sum, i) => sum + parseFloat(i.total_amount || 0), 0);
+
+    const pendingAmount = pendingInvoices.reduce(
+      (sum, i) => sum + parseFloat(i.total_amount || 0),
+      0
+    );
+
+    const overdueAmount = overdueInvoices.reduce(
+      (sum, i) => sum + parseFloat(i.total_amount || 0),
+      0
+    );
+
+    // Facture moyenne
+    const avgInvoiceAmount = paidInvoices.length > 0 ? totalRevenue / paidInvoices.length : 0;
+
+    // Taux de conversion (draft → paid)
+    const draftInvoices = invoices.filter((i) => i.status === "draft");
+    const conversionRate = invoices.length > 0 ? (paidInvoices.length / invoices.length) * 100 : 0;
+
+    return {
+      total_invoices: invoices.length,
+      total_revenue: totalRevenue,
+      pending_amount: pendingAmount,
+      overdue_invoices: overdueInvoices.length,
+      overdue_amount: overdueAmount,
+      pending_invoices: pendingInvoices.length,
+      paid_invoices: paidInvoices.length,
+      draft_invoices: draftInvoices.length,
+      cancelled_invoices: invoices.filter((i) => i.status === "cancelled").length,
+      avg_invoice_amount: avgInvoiceAmount,
+      conversion_rate: conversionRate,
+    };
+  }
+
+  /**
+   * Get start and end dates for different periods
+   * @private
+   */
+  _getPeriodDates(period) {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    let startDate, endDate, previousStartDate, previousEndDate;
+
+    switch (period) {
+      case "current_month":
+        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+        endDate = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        // Mois précédent
+        previousStartDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        previousEndDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        break;
+
+      case "last_month":
+        startDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        endDate = new Date(now.getFullYear(), now.getMonth(), 0);
+        // Mois d'avant
+        previousStartDate = new Date(now.getFullYear(), now.getMonth() - 2, 1);
+        previousEndDate = new Date(now.getFullYear(), now.getMonth() - 1, 0);
+        break;
+
+      case "current_quarter":
+        const quarterStart = Math.floor(now.getMonth() / 3) * 3;
+        startDate = new Date(now.getFullYear(), quarterStart, 1);
+        endDate = new Date(now.getFullYear(), quarterStart + 3, 0);
+        // Trimestre précédent
+        previousStartDate = new Date(now.getFullYear(), quarterStart - 3, 1);
+        previousEndDate = new Date(now.getFullYear(), quarterStart, 0);
+        break;
+
+      case "current_year":
+        startDate = new Date(now.getFullYear(), 0, 1);
+        endDate = new Date(now.getFullYear(), 11, 31);
+        // Année précédente
+        previousStartDate = new Date(now.getFullYear() - 1, 0, 1);
+        previousEndDate = new Date(now.getFullYear() - 1, 11, 31);
+        break;
+
+      case "last_year":
+        startDate = new Date(now.getFullYear() - 1, 0, 1);
+        endDate = new Date(now.getFullYear() - 1, 11, 31);
+        // Année d'avant
+        previousStartDate = new Date(now.getFullYear() - 2, 0, 1);
+        previousEndDate = new Date(now.getFullYear() - 2, 11, 31);
+        break;
+
+      case "last_30_days":
+        endDate = new Date(startOfToday);
+        startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - 30);
+        // 30 jours précédents
+        previousEndDate = new Date(startDate);
+        previousStartDate = new Date(previousEndDate);
+        previousStartDate.setDate(previousStartDate.getDate() - 30);
+        break;
+
+      case "last_90_days":
+        endDate = new Date(startOfToday);
+        startDate = new Date(endDate);
+        startDate.setDate(startDate.getDate() - 90);
+        // 90 jours précédents
+        previousEndDate = new Date(startDate);
+        previousStartDate = new Date(previousEndDate);
+        previousStartDate.setDate(previousStartDate.getDate() - 90);
+        break;
+
+      case "all_time":
+      default:
+        startDate = new Date("2000-01-01"); // Date très ancienne
+        endDate = new Date();
+        // Pour "tout temps", on compare avec l'année précédente
+        previousStartDate = new Date("2000-01-01");
+        previousEndDate = new Date(now.getFullYear() - 1, 11, 31);
+        break;
+    }
+
+    return { startDate, endDate, previousStartDate, previousEndDate };
+  }
+
+  /**
+   * Calculate evolution percentage between two values
+   * @private
+   */
+  _calculateEvolution(current, previous) {
+    if (previous === 0) {
+      return current > 0 ? 100 : 0;
+    }
+    return Math.round(((current - previous) / previous) * 100);
+  }
+
+  /**
+   * Get recommended default period based on user activity
+   */
+  async getRecommendedPeriod() {
+    try {
+      const { data: recentInvoices, error } = await supabase
+        .from("invoices")
+        .select("invoice_date")
+        .order("invoice_date", { ascending: false })
+        .limit(10);
+
+      if (error) throw error;
+
+      if (!recentInvoices || recentInvoices.length === 0) {
+        return "all_time";
+      }
+
+      const now = new Date();
+      const mostRecentInvoice = new Date(recentInvoices[0].invoice_date);
+      const daysSinceLastInvoice = Math.floor((now - mostRecentInvoice) / (1000 * 60 * 60 * 24));
+
+      // Logique de recommandation basée sur l'activité
+      if (daysSinceLastInvoice <= 7) {
+        return "current_month";
+      } else if (daysSinceLastInvoice <= 30) {
+        return "last_30_days";
+      } else if (daysSinceLastInvoice <= 90) {
+        return "current_quarter";
+      } else {
+        return "current_year";
+      }
+    } catch (error) {
+      console.error("Error getting recommended period:", error);
+      return "current_month"; // Défaut sécurisé
+    }
   }
 }

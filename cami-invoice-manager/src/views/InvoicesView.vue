@@ -6,52 +6,137 @@
     <!-- En-tête de page -->
     <div class="mb-4 sm:mb-6">
       <h1 class="text-2xl sm:text-3xl font-bold text-primary mb-2">Gestion des factures</h1>
-      <p class="text-muted-color text-sm sm:text-base">Gérez les factures de vos élèves et clients d'entreprise</p>
+      <p class="text-muted-color text-sm sm:text-base">
+        Gérez les factures de vos élèves et clients d'entreprise
+      </p>
     </div>
 
-    <!-- Cartes de statistiques - Grille responsive -->
+    <!-- Cartes de statistiques améliorées avec sélecteur de période -->
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+      <!-- Sélecteur de période (mobile/desktop responsive) -->
+      <div class="col-span-2 lg:col-span-4 mb-3">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold text-surface-900">Aperçu financier</h3>
+          <div class="flex items-center gap-2">
+            <!-- Sélecteur période mobile -->
+            <Select
+              v-model="selectedPeriod"
+              :options="periodOptions"
+              optionLabel="label"
+              optionValue="value"
+              @change="onPeriodChange"
+              class="w-40 text-sm"
+              :class="isMobile ? 'text-xs' : ''"
+            />
+            <!-- Indicateur de comparaison -->
+            <Button
+              :icon="showComparison ? 'pi pi-eye-slash' : 'pi pi-eye'"
+              @click="toggleComparison"
+              variant="text"
+              size="small"
+              v-tooltip="showComparison ? 'Masquer comparaison' : 'Afficher comparaison'"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Carte 1: Total Factures avec évolution -->
       <div class="card p-3 sm:p-4">
         <div class="flex justify-between items-start">
           <div>
-            <div class="text-xl sm:text-2xl font-bold text-primary">{{ stats.total_invoices || 0 }}</div>
-            <div class="text-xs sm:text-sm text-muted-color">Total factures</div>
+            <div class="text-xl sm:text-2xl font-bold text-primary">
+              {{ stats.total_invoices || 0 }}
+            </div>
+            <div class="text-xs sm:text-sm text-muted-color">Factures {{ periodLabel }}</div>
+            <!-- Comparaison période précédente -->
+            <div
+              v-if="showComparison && stats.invoices_evolution"
+              class="flex items-center gap-1 mt-1"
+            >
+              <i
+                :class="
+                  stats.invoices_evolution >= 0
+                    ? 'pi pi-arrow-up text-green-600'
+                    : 'pi pi-arrow-down text-red-600'
+                "
+                class="text-xs"
+              ></i>
+              <span
+                class="text-xs"
+                :class="stats.invoices_evolution >= 0 ? 'text-green-600' : 'text-red-600'"
+              >
+                {{ Math.abs(stats.invoices_evolution) }}% vs période précédente
+              </span>
+            </div>
           </div>
           <i class="pi pi-receipt text-lg sm:text-xl text-primary"></i>
         </div>
       </div>
 
+      <!-- Carte 2: Revenus avec période dynamique -->
       <div class="card p-3 sm:p-4">
         <div class="flex justify-between items-start">
           <div>
             <div class="text-xl sm:text-2xl font-bold text-green-600">
-              € {{ (stats.total_revenue || 0).toFixed(2) }}
+              €{{ formatRevenue(stats.total_revenue) }}
             </div>
-            <div class="text-xs sm:text-sm text-muted-color">Revenus totaux</div>
+            <div class="text-xs sm:text-sm text-muted-color">Revenus {{ periodLabel }}</div>
+            <!-- Évolution revenus -->
+            <div
+              v-if="showComparison && stats.revenue_evolution"
+              class="flex items-center gap-1 mt-1"
+            >
+              <i
+                :class="
+                  stats.revenue_evolution >= 0
+                    ? 'pi pi-arrow-up text-green-600'
+                    : 'pi pi-arrow-down text-red-600'
+                "
+                class="text-xs"
+              ></i>
+              <span
+                class="text-xs"
+                :class="stats.revenue_evolution >= 0 ? 'text-green-600' : 'text-red-600'"
+              >
+                {{ Math.abs(stats.revenue_evolution) }}%
+              </span>
+            </div>
           </div>
           <i class="pi pi-euro text-lg sm:text-xl text-green-600"></i>
         </div>
       </div>
 
+      <!-- Carte 3: Montant en attente (toujours pertinent) -->
       <div class="card p-3 sm:p-4">
         <div class="flex justify-between items-start">
           <div>
             <div class="text-xl sm:text-2xl font-bold text-orange-500">
-              € {{ (stats.pending_amount || 0).toFixed(2) }}
+              €{{ (stats.pending_amount || 0).toFixed(2) }}
             </div>
-            <div class="text-xs sm:text-sm text-muted-color">Montant en attente</div>
+            <div class="text-xs sm:text-sm text-muted-color">En attente</div>
+            <!-- Nombre de factures en attente -->
+            <div class="text-xs text-muted-color mt-1">
+              {{ stats.pending_invoices || 0 }} facture(s)
+            </div>
           </div>
           <i class="pi pi-clock text-lg sm:text-xl text-orange-500"></i>
         </div>
       </div>
 
+      <!-- Carte 4: Dynamique selon période -->
       <div class="card p-3 sm:p-4">
         <div class="flex justify-between items-start">
           <div>
-            <div class="text-xl sm:text-2xl font-bold text-red-500">{{ stats.overdue_invoices || 0 }}</div>
-            <div class="text-xs sm:text-sm text-muted-color">Factures en retard</div>
+            <div class="text-xl sm:text-2xl font-bold text-blue-500">
+              {{ getCard4Value() }}
+            </div>
+            <div class="text-xs sm:text-sm text-muted-color">{{ getCard4Label() }}</div>
+            <!-- Info supplémentaire -->
+            <div v-if="getCard4SubInfo()" class="text-xs text-muted-color mt-1">
+              {{ getCard4SubInfo() }}
+            </div>
           </div>
-          <i class="pi pi-exclamation-triangle text-lg sm:text-xl text-red-500"></i>
+          <i :class="getCard4Icon()" class="text-lg sm:text-xl text-blue-400"></i>
         </div>
       </div>
     </div>
@@ -148,13 +233,13 @@
           />
         </div>
         <Button
-            :label="viewMode === 'cards' ? 'Tableau' : 'Cartes'"
-            :icon="viewMode === 'cards' ? 'pi pi-table' : 'pi pi-th-large'"
-            @click="toggleViewMode"
-            severity="secondary"
-            outlined
-            size="small"
-          />
+          :label="viewMode === 'cards' ? 'Tableau' : 'Cartes'"
+          :icon="viewMode === 'cards' ? 'pi pi-table' : 'pi pi-th-large'"
+          @click="toggleViewMode"
+          severity="secondary"
+          outlined
+          size="small"
+        />
       </div>
     </div>
 
@@ -182,7 +267,9 @@
                 class="flex-shrink-0"
               />
               <div class="min-w-0 flex-1">
-                <div class="font-semibold text-surface-900 truncate">{{ invoice.invoice_number }}</div>
+                <div class="font-semibold text-surface-900 truncate">
+                  {{ invoice.invoice_number }}
+                </div>
                 <div class="text-sm text-muted-color truncate">{{ invoice.customer_name }}</div>
                 <div class="flex items-center gap-2 mt-1">
                   <Tag
@@ -190,14 +277,19 @@
                     :severity="getStatusSeverity(invoice.status, invoice.overdue)"
                     size="small"
                   />
-                  <span v-if="invoice.overdue && invoice.days_overdue > 0" class="text-xs text-red-500">
+                  <span
+                    v-if="invoice.overdue && invoice.days_overdue > 0"
+                    class="text-xs text-red-500"
+                  >
                     {{ invoice.days_overdue }}j en retard
                   </span>
                 </div>
               </div>
             </div>
             <div class="flex flex-col items-end gap-1">
-              <div class="font-bold text-lg text-surface-900">€{{ (invoice.total_amount || 0).toFixed(2) }}</div>
+              <div class="font-bold text-lg text-surface-900">
+                €{{ (invoice.total_amount || 0).toFixed(2) }}
+              </div>
               <Button
                 icon="pi pi-ellipsis-v"
                 @click="toggleInvoiceActions($event, invoice)"
@@ -243,11 +335,15 @@
               <div class="text-xs text-muted-color">Articles</div>
             </div>
             <div class="text-center">
-              <div class="text-lg font-semibold text-emerald-600">€{{ (invoice.subtotal || 0).toFixed(2) }}</div>
+              <div class="text-lg font-semibold text-emerald-600">
+                €{{ (invoice.subtotal || 0).toFixed(2) }}
+              </div>
               <div class="text-xs text-muted-color">Sous-total</div>
             </div>
             <div class="text-center">
-              <div class="text-lg font-semibold text-orange-600">€{{ (invoice.tax_amount || 0).toFixed(2) }}</div>
+              <div class="text-lg font-semibold text-orange-600">
+                €{{ (invoice.tax_amount || 0).toFixed(2) }}
+              </div>
               <div class="text-xs text-muted-color">TVA</div>
             </div>
           </div>
@@ -291,7 +387,11 @@
           <i class="pi pi-receipt text-6xl text-muted-color mb-4 block"></i>
           <h3 class="text-lg font-medium mb-2">Aucune facture trouvée</h3>
           <p class="text-muted-color mb-6 text-sm">
-            {{ globalFilter ? 'Essayez d\'ajuster vos termes de recherche' : 'Commencez par créer votre première facture' }}
+            {{
+              globalFilter
+                ? "Essayez d'ajuster vos termes de recherche"
+                : "Commencez par créer votre première facture"
+            }}
           </p>
           <Button
             icon="pi pi-plus"
@@ -304,7 +404,10 @@
     </div>
 
     <!-- Vue DataTable desktop -->
-    <div v-else-if="!isMobile" class="bg-white rounded-xl border border-surface-200 shadow-sm overflow-hidden">
+    <div
+      v-else-if="!isMobile"
+      class="bg-white rounded-xl border border-surface-200 shadow-sm overflow-hidden"
+    >
       <DataTable
         v-model:expandedRows="expandedRows"
         :value="filteredInvoices"
@@ -320,13 +423,19 @@
         :pt="{
           header: { class: 'border-0 bg-surface-50' },
           table: { class: 'border-0' },
-          bodyRow: { class: 'hover:bg-surface-50 transition-colors' }
+          bodyRow: { class: 'hover:bg-surface-50 transition-colors' },
         }"
       >
         <template #header>
           <div class="flex flex-wrap justify-between gap-2 p-4">
             <div class="flex gap-2">
-              <Button text icon="pi pi-plus" label="Tout développer" @click="expandAll" size="small" />
+              <Button
+                text
+                icon="pi pi-plus"
+                label="Tout développer"
+                @click="expandAll"
+                size="small"
+              />
               <Button
                 text
                 icon="pi pi-minus"
@@ -385,9 +494,6 @@
               :value="translateStatus(data.status)"
               :severity="getStatusSeverity(data.status, data.overdue)"
             />
-            <div v-if="data.overdue && data.days_overdue > 0" class="text-xs text-red-500 mt-1">
-              {{ data.days_overdue }} jours en retard
-            </div>
           </template>
         </Column>
 
@@ -465,7 +571,9 @@
                   <div class="flex justify-between">
                     <span class="text-muted-color">Type de client :</span>
                     <Tag
-                      :value="data.customer?.client_type === 'individual' ? 'Étudiant' : 'Entreprise'"
+                      :value="
+                        data.customer?.client_type === 'individual' ? 'Étudiant' : 'Entreprise'
+                      "
                       :severity="data.customer?.client_type === 'individual' ? 'secondary' : 'info'"
                       size="small"
                     />
@@ -556,7 +664,7 @@
       :closable="true"
       :pt="{
         root: isMobile ? 'fixed inset-0' : '',
-        content: isMobile ? 'h-full overflow-y-auto' : ''
+        content: isMobile ? 'h-full overflow-y-auto' : '',
       }"
     >
       <InvoiceForm
@@ -631,15 +739,36 @@ export default {
       statusFilter: null,
 
       // État spécifique mobile
-      viewMode: 'cards', // 'cards' ou 'table'
+      viewMode: "cards", // 'cards' ou 'table'
       isMobile: false,
 
       // Stats
+      selectedPeriod: "current_month",
+      showComparison: true,
+
+      periodOptions: [
+        { label: "Ce mois", value: "current_month" },
+        { label: "Mois dernier", value: "last_month" },
+        { label: "Ce trimestre", value: "current_quarter" },
+        { label: "Cette année", value: "current_year" },
+        { label: "Année dernière", value: "last_year" },
+        { label: "Tout temps", value: "all_time" },
+        { label: "30 derniers jours", value: "last_30_days" },
+        { label: "90 derniers jours", value: "last_90_days" },
+      ],
+
+      // Stats avec données de comparaison
       stats: {
         total_invoices: 0,
         total_revenue: 0,
         pending_amount: 0,
         overdue_invoices: 0,
+        pending_invoices: 0,
+        // Nouvelles propriétés pour l'évolution
+        invoices_evolution: null, // % évolution vs période précédente
+        revenue_evolution: null,
+        avg_invoice_amount: 0,
+        conversion_rate: 0, // draft -> paid
       },
 
       // État dialogue
@@ -653,7 +782,6 @@ export default {
         { label: "Brouillon", value: "draft" },
         { label: "Envoyée", value: "sent" },
         { label: "Payée", value: "paid" },
-        { label: "En retard", value: "overdue" },
         { label: "Annulée", value: "cancelled" },
       ],
 
@@ -661,27 +789,42 @@ export default {
       invoicesService: new InvoicesService(),
     };
   },
+  computed: {
+    periodLabel() {
+      const labels = {
+        current_month: "ce mois",
+        last_month: "mois dernier",
+        current_quarter: "ce trimestre",
+        current_year: "cette année",
+        last_year: "année dernière",
+        all_time: "au total",
+        last_30_days: "30 derniers jours",
+        last_90_days: "90 derniers jours",
+      };
+      return labels[this.selectedPeriod] || "période sélectionnée";
+    },
+  },
 
   async created() {
     await Promise.all([this.loadInvoices(), this.loadStats()]);
-    this.checkMobile()
-    window.addEventListener('resize', this.checkMobile)
+    this.checkMobile();
+    window.addEventListener("resize", this.checkMobile);
   },
 
   beforeUnmount() {
-    window.removeEventListener('resize', this.checkMobile)
+    window.removeEventListener("resize", this.checkMobile);
   },
 
   methods: {
     checkMobile() {
-      this.isMobile = window.innerWidth < 768
+      this.isMobile = window.innerWidth < 768;
       if (this.isMobile) {
-        this.viewMode = 'cards'
+        this.viewMode = "cards";
       }
     },
 
     toggleViewMode() {
-      this.viewMode = this.viewMode === 'cards' ? 'table' : 'cards'
+      this.viewMode = this.viewMode === "cards" ? "table" : "cards";
     },
 
     async loadInvoices() {
@@ -712,6 +855,97 @@ export default {
         this.statsLoading = false;
       }
     },
+    async onPeriodChange() {
+      await this.loadStatsByPeriod(this.selectedPeriod);
+    },
+
+    toggleComparison() {
+      this.showComparison = !this.showComparison;
+    },
+
+    // Logique pour la 4ème carte selon la période
+    getCard4Value() {
+      switch (this.selectedPeriod) {
+        case "current_month":
+        case "last_30_days":
+        case "current_year":
+        case "all_time":
+          return `€${Math.round(this.stats.avg_invoice_amount || 0)}`;
+        case "current_quarter":
+        case "last_90_days":
+          return `${Math.round(this.stats.conversion_rate || 0)}%`;
+        default:
+          return `€${Math.round(this.stats.avg_invoice_amount || 0)}`;
+      }
+    },
+
+    getCard4Label() {
+      switch (this.selectedPeriod) {
+        case "current_month":
+        case "last_30_days":
+        case "current_year":
+        case "all_time":
+          return "Facture moyenne";
+        case "current_quarter":
+        case "last_90_days":
+          return "Taux conversion";
+        default:
+          return "Facture moyenne";
+      }
+    },
+
+    getCard4SubInfo() {
+      switch (this.selectedPeriod) {
+        case "current_year":
+        case "all_time":
+          return `Sur ${this.stats.total_invoices} factures`;
+        case "current_quarter":
+        case "last_90_days":
+          return "Draft → Payé";
+        default:
+          return null;
+      }
+    },
+
+    getCard4Icon() {
+      switch (this.selectedPeriod) {
+        case "current_year":
+        case "all_time":
+          return "pi pi-calculator text-lg sm:text-xl text-blue-500";
+        case "current_quarter":
+        case "last_90_days":
+          return "pi pi-percentage text-lg sm:text-xl text-purple-500";
+        default:
+          return "pi pi-calculator text-lg sm:text-xl text-blue-500";
+      }
+    },
+
+    formatRevenue(amount) {
+      const num = Number(amount) || 0;
+      if (num >= 10000) {
+        return `${(num / 1000).toFixed(1)}k`;
+      }
+      return num.toFixed(0);
+    },
+
+    // Nouvelle méthode pour charger les stats par période
+    async loadStatsByPeriod(period) {
+      this.statsLoading = true;
+      try {
+        // Appel au service avec la période
+        this.stats = await this.invoicesService.getInvoiceStatsByPeriod(period);
+      } catch (error) {
+        console.error("Error loading stats by period:", error);
+        this.$toast.add({
+          severity: "error",
+          summary: "Erreur",
+          detail: "Impossible de charger les statistiques",
+          life: 3000,
+        });
+      } finally {
+        this.statsLoading = false;
+      }
+    },
 
     applyFilters() {
       let filtered = [...this.invoices];
@@ -736,6 +970,14 @@ export default {
             (invoice.notes || "").toLowerCase().includes(searchTerm)
         );
       }
+
+      filtered.sort((a, b) => {
+        const dateA = new Date(a.invoice_date);
+        const dateB = new Date(b.invoice_date);
+
+        // Tri décroissant: les factures les plus récentes en premier
+        return dateB - dateA;
+      });
 
       this.filteredInvoices = filtered;
     },
@@ -811,7 +1053,9 @@ export default {
         this.$toast.add({
           severity: "error",
           summary: "Erreur",
-          detail: this.isEditing ? "Échec de la modification de la facture" : "Échec de la création de la facture",
+          detail: this.isEditing
+            ? "Échec de la modification de la facture"
+            : "Échec de la création de la facture",
           life: 5000,
         });
       }
@@ -869,8 +1113,7 @@ export default {
         draft: "Brouillon",
         sent: "Envoyée",
         paid: "Payée",
-        overdue: "En retard",
-        cancelled: "Annulée"
+        cancelled: "Annulée",
       };
       return labels[status] || status;
     },
@@ -883,8 +1126,7 @@ export default {
         draft: "pi pi-file-edit",
         sent: "pi pi-send",
         paid: "pi pi-check-circle",
-        overdue: "pi pi-exclamation-triangle",
-        cancelled: "pi pi-times-circle"
+        cancelled: "pi pi-times-circle",
       };
       return icons[status] || "pi pi-circle";
     },
@@ -898,7 +1140,7 @@ export default {
         sent: "secondary",
         paid: "warning",
         overdue: "danger",
-        cancelled: "secondary"
+        cancelled: "secondary",
       };
       return severities[status] || "secondary";
     },
@@ -910,7 +1152,7 @@ export default {
       const actions = [];
 
       // Actions selon l'état actuel
-      if (invoice.status !== 'draft') {
+      if (invoice.status !== "draft") {
         actions.push({
           label: "Marquer comme brouillon",
           icon: "pi pi-file-edit",
@@ -918,7 +1160,7 @@ export default {
         });
       }
 
-      if (invoice.status !== 'sent') {
+      if (invoice.status !== "sent") {
         actions.push({
           label: "Marquer comme envoyée",
           icon: "pi pi-send",
@@ -926,7 +1168,7 @@ export default {
         });
       }
 
-      if (invoice.status !== 'paid') {
+      if (invoice.status !== "paid") {
         actions.push({
           label: "Marquer comme payée",
           icon: "pi pi-check-circle",
@@ -934,7 +1176,7 @@ export default {
         });
       }
 
-      if (invoice.status !== 'cancelled') {
+      if (invoice.status !== "cancelled") {
         actions.push({
           label: "Annuler la facture",
           icon: "pi pi-times-circle",
@@ -953,7 +1195,7 @@ export default {
           draft: "brouillon",
           sent: "envoyée",
           paid: "payée",
-          cancelled: "annulée"
+          cancelled: "annulée",
         };
 
         this.$toast.add({
@@ -1020,11 +1262,11 @@ export default {
         const duplicateData = {
           ...invoice,
           invoice_number: null, // Sera généré automatiquement
-          status: 'draft',
-          invoice_date: new Date().toISOString().split('T')[0],
+          status: "draft",
+          invoice_date: new Date().toISOString().split("T")[0],
           due_date: null, // Sera calculé automatiquement
           created_at: null,
-          updated_at: null
+          updated_at: null,
         };
 
         // Supprimer l'ID pour créer une nouvelle facture
@@ -1055,15 +1297,15 @@ export default {
     // Méthodes de communication
     openEmail(email) {
       if (email) {
-        window.open(`mailto:${email}`, '_blank')
+        window.open(`mailto:${email}`, "_blank");
         this.$toast.add({
-          severity: 'info',
-          summary: 'Email',
+          severity: "info",
+          summary: "Email",
           detail: `Ouverture de l'email vers ${email}...`,
-          life: 2000
-        })
+          life: 2000,
+        });
       }
-      this.hideAllPanels()
+      this.hideAllPanels();
     },
 
     sendByEmail(invoice) {
@@ -1142,7 +1384,7 @@ export default {
         sent: "Envoyée",
         paid: "Payée",
         overdue: "En retard",
-        cancelled: "Annulée"
+        cancelled: "Annulée",
       };
       return translations[status] || status;
     },
