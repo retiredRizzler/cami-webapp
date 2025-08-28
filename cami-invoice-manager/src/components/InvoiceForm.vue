@@ -1,7 +1,7 @@
 <template>
   <div class="relative">
     <!-- Mobile Floating Action Header - Uniquement visible sur mobile -->
-    <div v-if="isMobile" class="sticky top-0 z-10 bg-white border-b border-surface-200 p-3 mb-4 -mx-4 -mt-4">
+    <div v-if="isMobile" class="sticky top-0 z-10 p-3 mb-4 -mx-4 -mt-4">
       <div class="flex items-center justify-between">
         <div class="flex items-center gap-2">
           <i class="pi pi-receipt text-primary"></i>
@@ -1132,18 +1132,6 @@ export default {
   .p-button-sm .px-3 {
     padding-left: 0.5rem;
     padding-right: 0.5rem;
-  }
-}
-
-/* Dark mode support (si activé dans PrimeVue) */
-@media (prefers-color-scheme: dark) {
-  .sticky.top-0 {
-    background-color: rgba(31, 41, 55, 0.95);
-    border-color: var(--p-surface-700);
-  }
-
-  .mobile-safe-area {
-    background-color: var(--p-surface-900);
   }
 }
 </style>
