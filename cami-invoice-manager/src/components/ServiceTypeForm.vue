@@ -106,14 +106,12 @@
               mode="currency"
               currency="EUR"
               locale="fr-FR"
-              :min="0.01"
               :step="0.50"
               showButtons
               fluid
               :invalid="$form.unit_price?.invalid"
               :disabled="loading"
               :allowEmpty="false"
-              placeholder="0,00 €"
             />
             <label for="unit_price">Prix unitaire *</label>
           </FloatLabel>
