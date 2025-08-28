@@ -47,7 +47,6 @@
             fluid
             :invalid="$form.description?.invalid"
             :disabled="loading"
-            placeholder="Décrivez ce service (optionnel)..."
           />
           <label for="description">Description</label>
         </FloatLabel>
@@ -113,6 +112,8 @@
               fluid
               :invalid="$form.unit_price?.invalid"
               :disabled="loading"
+              :allowEmpty="false"
+              placeholder="0,00 €"
             />
             <label for="unit_price">Prix unitaire *</label>
           </FloatLabel>
@@ -136,6 +137,8 @@
               fluid
               :invalid="$form.default_duration_hours?.invalid"
               :disabled="loading"
+              :allowEmpty="true"
+              placeholder="1,0 h"
             />
             <label for="default_duration_hours">Durée par défaut</label>
           </FloatLabel>
@@ -264,12 +267,13 @@ export default {
           pricing_type: z.enum(['hourly', 'fixed', 'monthly'], {
             errorMap: () => ({ message: 'Veuillez sélectionner un type de tarification' })
           }),
-          unit_price: z.number()
+          unit_price: z.coerce.number()
             .min(0.01, { message: 'Le prix doit être supérieur à 0' })
             .max(9999.99, { message: 'Le prix ne peut pas dépasser 9999,99 €' }),
-          default_duration_hours: z.number()
+          default_duration_hours: z.coerce.number()
             .min(0, { message: 'La durée ne peut pas être négative' })
             .max(24, { message: 'La durée ne peut pas dépasser 24 heures' })
+            .nullable()
             .optional(),
           is_recurring: z.boolean().optional()
         })
