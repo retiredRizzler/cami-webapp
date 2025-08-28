@@ -1102,22 +1102,6 @@ export default {
   transition: all 0.2s ease;
 }
 
-/* Animation des éléments qui apparaissent */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.space-y-4 > div {
-  animation: fadeInUp 0.3s ease;
-}
-
 /* Responsive pour les très petits écrans */
 @media (max-width: 480px) {
   .p-4 {
