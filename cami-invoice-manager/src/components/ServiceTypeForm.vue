@@ -106,8 +106,6 @@
               mode="currency"
               currency="EUR"
               locale="fr-FR"
-              :step="0.50"
-              showButtons
               fluid
               :invalid="$form.unit_price?.invalid"
               :disabled="loading"
