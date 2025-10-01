@@ -47,66 +47,8 @@
           <span class="px-4 text-sm">or</span>
           <div class="flex-1 border-t"></div>
         </div>
+      </div>
 
-        <!-- Email/Password Form
-        <Form
-          v-slot="$form"
-          :resolver="resolver"
-          :initialValues="initialValues"
-          @submit="onFormSubmit"
-          class="flex flex-col gap-4"
-        >
-
-          <div class="flex flex-col gap-1">
-            <FloatLabel variant="on">
-              <InputText
-                id="email"
-                name="email"
-                type="email"
-                fluid
-                :invalid="$form.email?.invalid"
-                autocomplete="email"
-              />
-              <label for="email">Email</label>
-            </FloatLabel>
-            <Message v-if="$form.email?.invalid" severity="error" size="small" variant="simple">
-              {{ $form.email.error?.message }}
-            </Message>
-          </div>
-
-
-          <div class="flex flex-col gap-1">
-            <FloatLabel variant="on">
-              <Password
-                id="password"
-                name="password"
-                fluid
-                :invalid="$form.password?.invalid"
-                :feedback="false"
-                toggleMask
-                autocomplete="current-password"
-              />
-              <label for="password">Mot de passe</label>
-            </FloatLabel>
-            <Message v-if="$form.password?.invalid" severity="error" size="small" variant="simple">
-              {{ $form.password.error?.message }}
-            </Message>
-          </div>
-
-
-          <div class="flex justify-between items-center">
-            <div class="flex items-center gap-2">
-              <Checkbox id="remember" v-model="rememberMe" binary />
-              <label for="remember" class="text-sm"> Se souvenir de moi </label>
-            </div>
-            <Button link size="small" class="p-0 text-sm" @click="showForgotPassword">
-              Mot de passe oublié?
-            </Button>
-          </div>
-   <Button type="submit" :loading="loginLoading" class="w-full" label="Se Connecter" />
-        </Form>
-
-        -->
       <!-- Footer -->
       <div class="text-center mt-8">
         <p class="text-xs"></p>
