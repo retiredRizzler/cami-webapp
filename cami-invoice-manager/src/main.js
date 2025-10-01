@@ -264,7 +264,7 @@ app.use(router)
 app.use(ToastService);
 app.use(PrimeVue, {
     theme: {
-        preset: Corporate,
+        preset: Noir,
         options: {
             darkModeSelector: 'none', // Changed to class-based selector
         }

@@ -40,13 +40,6 @@
           </svg>
           Continuez avec Google
         </Button>
-
-        <!-- Divider -->
-        <div class="flex items-center my-6">
-          <div class="flex-1 border-t"></div>
-          <span class="px-4 text-sm">or</span>
-          <div class="flex-1 border-t"></div>
-        </div>
       </div>
 
       <!-- Footer -->
