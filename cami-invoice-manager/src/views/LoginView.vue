@@ -48,7 +48,7 @@
           <div class="flex-1 border-t"></div>
         </div>
 
-        <!-- Email/Password Form -->
+        <!-- Email/Password Form
         <Form
           v-slot="$form"
           :resolver="resolver"
@@ -56,7 +56,7 @@
           @submit="onFormSubmit"
           class="flex flex-col gap-4"
         >
-          <!-- Email Field -->
+
           <div class="flex flex-col gap-1">
             <FloatLabel variant="on">
               <InputText
@@ -74,7 +74,7 @@
             </Message>
           </div>
 
-          <!-- Password Field -->
+
           <div class="flex flex-col gap-1">
             <FloatLabel variant="on">
               <Password
@@ -93,7 +93,7 @@
             </Message>
           </div>
 
-          <!-- Remember Me & Forgot Password -->
+
           <div class="flex justify-between items-center">
             <div class="flex items-center gap-2">
               <Checkbox id="remember" v-model="rememberMe" binary />
@@ -103,20 +103,10 @@
               Mot de passe oublié?
             </Button>
           </div>
-
-          <!-- Submit Button -->
-          <Button type="submit" :loading="loginLoading" class="w-full" label="Se Connecter" />
+   <Button type="submit" :loading="loginLoading" class="w-full" label="Se Connecter" />
         </Form>
 
-        <!-- Sign Up Link -->
-        <div class="text-center mt-6 pt-6 border-t">
-          <p class="text-sm">
-            Pas encore de compte?
-            <Button link class="p-0 text-sm font-medium" @click="goToSignUp"> Créez un nouveau compte </Button>
-          </p>
-        </div>
-      </div>
-
+        -->
       <!-- Footer -->
       <div class="text-center mt-8">
         <p class="text-xs"></p>
